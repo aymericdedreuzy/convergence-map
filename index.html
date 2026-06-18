@@ -119,6 +119,8 @@ let currentEventCode = null;
 let myParticipantId = null;
 let trackingInterval = null;
 let liveMarkers = {};
+let livePolylines = {};
+let liveTrails = {}; // pid -> array of [lat,lng]
 let liveUnsub = null;
 let replayData = {};
 let replayInterval = null;
@@ -165,7 +167,11 @@ function startWatching(code) {
   liveUnsub = onValue(ref(db, `positions/${code}`), snap => {
     const data = snap.val() || {};
     Object.keys(liveMarkers).forEach(id => {
-      if (!data[id]) { map.removeLayer(liveMarkers[id]); delete liveMarkers[id]; }
+      if (!data[id]) {
+        map.removeLayer(liveMarkers[id]); delete liveMarkers[id];
+        if (livePolylines[id]) { map.removeLayer(livePolylines[id]); delete livePolylines[id]; }
+        delete liveTrails[id];
+      }
     });
     const plist = document.getElementById('plist');
     plist.innerHTML = '';
@@ -176,6 +182,19 @@ function startWatching(code) {
         liveMarkers[id].setLatLng([p.lat, p.lng]);
       } else {
         liveMarkers[id] = L.marker([p.lat, p.lng], { icon: makeIcon(color) }).addTo(map).bindPopup(`<b>${p.pseudo}</b>`);
+        liveTrails[id] = [];
+      }
+      // Append to trail if position changed
+      const trail = liveTrails[id] || [];
+      const last = trail[trail.length - 1];
+      if (!last || last[0] !== p.lat || last[1] !== p.lng) {
+        trail.push([p.lat, p.lng]);
+        liveTrails[id] = trail;
+        if (livePolylines[id]) {
+          livePolylines[id].setLatLngs(trail);
+        } else {
+          livePolylines[id] = L.polyline(trail, { color, weight: 3, opacity: 0.7 }).addTo(map);
+        }
       }
       plist.innerHTML += `<div class="participant-item"><div class="participant-dot" style="background:${color}"></div>${p.pseudo}</div>`;
       count++;
@@ -273,7 +292,8 @@ document.getElementById('btn-stop').addEventListener('click', () => {
   if (trackingInterval) clearInterval(trackingInterval);
   if (liveUnsub) liveUnsub();
   Object.values(liveMarkers).forEach(m => map.removeLayer(m));
-  liveMarkers = {};
+  Object.values(livePolylines).forEach(p => map.removeLayer(p));
+  liveMarkers = {}; livePolylines = {}; liveTrails = {};
   document.getElementById('btn-stop').style.display = 'none';
   document.getElementById('participants-list').style.display = 'none';
   setStatus('En attente', '');
