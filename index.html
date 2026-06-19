@@ -7,33 +7,57 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; height: 100vh; display: flex; flex-direction: column; }
-  #topbar { background: #1e293b; padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #334155; z-index: 1000; }
-  #topbar h1 { font-size: 1rem; font-weight: 700; color: #38bdf8; white-space: nowrap; }
-  .btn { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: opacity 0.2s; }
-  .btn:hover { opacity: 0.85; }
-  .btn-blue { background: #3b82f6; color: white; }
-  .btn-green { background: #22c55e; color: white; }
-  .btn-red { background: #ef4444; color: white; }
-  .btn-orange { background: #f97316; color: white; }
-  .btn-gray { background: #475569; color: white; }
-  #status { font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; background: #334155; color: #94a3b8; white-space: nowrap; }
-  #status.live { background: #14532d; color: #4ade80; }
-  #status.replay { background: #1e3a5f; color: #60a5fa; }
-  #map { flex: 1; }
-  #panel { position: absolute; top: 70px; left: 16px; z-index: 1000; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px; width: 260px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); display: none; }
-  #panel h2 { font-size: 0.85rem; color: #94a3b8; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
-  #panel input, #panel select { width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 0.85rem; margin-bottom: 8px; }
-  #panel label { font-size: 0.8rem; color: #94a3b8; display: block; margin-bottom: 3px; }
-  #participants-list { position: absolute; top: 70px; right: 16px; z-index: 1000; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 14px; width: 200px; max-height: 400px; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.4); display: none; }
-  #participants-list h2 { font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .participant-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #334155; font-size: 0.8rem; }
-  .participant-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  #replay-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 12px 20px; display: none; align-items: center; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); min-width: 400px; }
-  #replay-bar.visible { display: flex; }
-  #replay-slider { flex: 1; accent-color: #3b82f6; }
-  #replay-time { font-size: 0.75rem; color: #94a3b8; white-space: nowrap; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; height:100vh; display:flex; flex-direction:column; }
+
+#topbar { background:#1e293b; padding:8px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; border-bottom:1px solid #334155; z-index:1000; }
+#topbar h1 { font-size:1rem; font-weight:700; color:#38bdf8; white-space:nowrap; }
+.btn { padding:6px 13px; border:none; border-radius:6px; cursor:pointer; font-size:0.78rem; font-weight:600; transition:opacity 0.2s; }
+.btn:hover { opacity:0.85; }
+.btn-blue { background:#3b82f6; color:white; }
+.btn-green { background:#22c55e; color:white; }
+.btn-red { background:#ef4444; color:white; }
+.btn-orange { background:#f97316; color:white; }
+.btn-gray { background:#475569; color:white; }
+.btn-purple { background:#a855f7; color:white; }
+#status { font-size:0.73rem; padding:4px 10px; border-radius:12px; background:#334155; color:#94a3b8; white-space:nowrap; }
+#status.live { background:#14532d; color:#4ade80; }
+#status.replay { background:#1e3a5f; color:#60a5fa; }
+
+#map { flex:1; }
+
+/* Panel */
+#panel { position:absolute; top:60px; left:14px; z-index:1000; background:#1e293b; border:1px solid #334155; border-radius:10px; padding:14px; width:280px; box-shadow:0 4px 20px rgba(0,0,0,0.4); display:none; max-height:calc(100vh - 80px); overflow-y:auto; }
+#panel h2 { font-size:0.82rem; color:#94a3b8; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em; }
+#panel input, #panel select { width:100%; padding:7px 10px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:#e2e8f0; font-size:0.82rem; margin-bottom:7px; }
+#panel label { font-size:0.78rem; color:#94a3b8; display:block; margin-bottom:3px; }
+.section-title { font-size:0.75rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin:10px 0 6px; border-top:1px solid #334155; padding-top:8px; }
+.coord-row { display:flex; gap:6px; }
+.coord-row input { flex:1; }
+.wp-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+.wp-row input { flex:1; margin-bottom:0; }
+.btn-pick { padding:5px 8px; font-size:0.72rem; white-space:nowrap; }
+
+/* Participants */
+#participants-list { position:absolute; top:60px; right:14px; z-index:1000; background:#1e293b; border:1px solid #334155; border-radius:10px; padding:12px; width:190px; max-height:380px; overflow-y:auto; box-shadow:0 4px 20px rgba(0,0,0,0.4); display:none; }
+#participants-list h2 { font-size:0.82rem; color:#94a3b8; margin-bottom:7px; text-transform:uppercase; }
+.participant-item { display:flex; align-items:center; gap:7px; padding:4px 0; border-bottom:1px solid #334155; font-size:0.78rem; }
+.participant-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+/* Layer control custom */
+#layer-control { position:absolute; bottom:80px; right:14px; z-index:1000; background:#1e293b; border:1px solid #334155; border-radius:10px; padding:10px 14px; box-shadow:0 4px 20px rgba(0,0,0,0.4); }
+#layer-control h3 { font-size:0.75rem; color:#94a3b8; margin-bottom:8px; text-transform:uppercase; }
+#layer-control label { display:flex; align-items:center; gap:7px; font-size:0.78rem; cursor:pointer; padding:3px 0; }
+#layer-control input[type=radio] { accent-color:#3b82f6; }
+
+/* Replay bar */
+#replay-bar { position:absolute; bottom:16px; left:50%; transform:translateX(-50%); z-index:1000; background:#1e293b; border:1px solid #334155; border-radius:10px; padding:10px 18px; display:none; align-items:center; gap:10px; box-shadow:0 4px 20px rgba(0,0,0,0.4); min-width:380px; }
+#replay-bar.visible { display:flex; }
+#replay-slider { flex:1; accent-color:#3b82f6; }
+#replay-time { font-size:0.73rem; color:#94a3b8; white-space:nowrap; }
+
+/* Pick mode banner */
+#pick-banner { position:absolute; top:60px; left:50%; transform:translateX(-50%); z-index:2000; background:#f97316; color:white; padding:8px 20px; border-radius:8px; font-size:0.85rem; font-weight:600; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
 </style>
 </head>
 <body>
@@ -41,7 +65,7 @@
 <div id="topbar">
   <h1>🗺️ Convergence Map</h1>
   <button class="btn btn-blue" id="btn-join">Rejoindre</button>
-  <button class="btn btn-green" id="btn-create">Créer événement</button>
+  <button class="btn btn-green" id="btn-create">Créer</button>
   <button class="btn btn-orange" id="btn-watch">Observer</button>
   <button class="btn btn-gray" id="btn-replay" style="display:none">⏪ Replay</button>
   <button class="btn btn-red" id="btn-stop" style="display:none">⏹ Stop</button>
@@ -49,50 +73,94 @@
 </div>
 
 <div id="map"></div>
+<div id="pick-banner">📍 Cliquez sur la carte pour placer le point</div>
 
+<!-- Panel -->
 <div id="panel">
   <h2 id="panel-title"></h2>
+
+  <!-- JOIN -->
   <div id="panel-join" style="display:none">
     <label>Code événement</label>
-    <input id="join-code" placeholder="ex: TEST01" />
+    <input id="join-code" placeholder="ex: PELE2025"/>
     <label>Votre pseudo</label>
-    <input id="join-pseudo" placeholder="ex: Marie" />
+    <input id="join-pseudo" placeholder="ex: Marie"/>
     <button class="btn btn-blue" style="width:100%" id="btn-do-join">Rejoindre & partager ma position</button>
   </div>
+
+  <!-- CREATE -->
   <div id="panel-create" style="display:none">
     <label>Nom de l'événement</label>
-    <input id="create-name" placeholder="ex: Pèlerinage 2025" />
+    <input id="create-name" placeholder="ex: Pèlerinage Lourdes 2025"/>
     <label>Code d'accès</label>
-    <input id="create-code" placeholder="ex: PELE2025" />
+    <input id="create-code" placeholder="ex: PELE2025"/>
     <label>Durée (heures)</label>
-    <input id="create-duration" type="number" value="8" min="1" max="72" />
+    <input id="create-duration" type="number" value="8" min="1" max="72"/>
+
+    <div class="section-title">Départ (facultatif)</div>
+    <label>Nom du départ</label>
+    <input id="start-label" placeholder="ex: Cathédrale de Tours"/>
+    <div class="coord-row">
+      <input id="start-lat" placeholder="Latitude"/>
+      <input id="start-lng" placeholder="Longitude"/>
+    </div>
+    <button class="btn btn-gray btn-pick" id="btn-pick-start">📍 Placer sur la carte</button>
+
+    <div class="section-title">Arrivée (facultatif)</div>
+    <label>Nom de l'arrivée</label>
+    <input id="end-label" placeholder="ex: Sanctuaire de Lourdes"/>
+    <div class="coord-row">
+      <input id="end-lat" placeholder="Latitude"/>
+      <input id="end-lng" placeholder="Longitude"/>
+    </div>
+    <button class="btn btn-gray btn-pick" id="btn-pick-end">📍 Placer sur la carte</button>
+
+    <div class="section-title">Étapes (max 5, facultatif)</div>
+    <div id="waypoints-container"></div>
+    <button class="btn btn-gray" style="width:100%;margin-bottom:8px" id="btn-add-wp">+ Ajouter une étape</button>
+
     <button class="btn btn-green" style="width:100%" id="btn-do-create">Créer l'événement</button>
   </div>
+
+  <!-- WATCH -->
   <div id="panel-watch" style="display:none">
     <label>Code événement</label>
-    <input id="watch-code" placeholder="ex: TEST01" />
+    <input id="watch-code" placeholder="ex: PELE2025"/>
     <button class="btn btn-orange" style="width:100%" id="btn-do-watch">Observer en direct</button>
   </div>
+
   <button class="btn btn-gray" style="width:100%;margin-top:8px" id="btn-close-panel">Fermer</button>
 </div>
 
+<!-- Participants -->
 <div id="participants-list">
   <h2>Participants <span id="count">0</span></h2>
   <div id="plist"></div>
 </div>
 
+<!-- Layer control -->
+<div id="layer-control">
+  <h3>Fond de carte</h3>
+  <label><input type="radio" name="layer" value="osm" checked> OpenStreetMap</label>
+  <label><input type="radio" name="layer" value="satellite"> Satellite</label>
+  <label><input type="radio" name="layer" value="topo"> Topographique</label>
+  <label><input type="radio" name="layer" value="dark"> Sombre</label>
+  <label><input type="radio" name="layer" value="parchment" id="layer-parchment"> Parchemin</label>
+</div>
+
+<!-- Replay bar -->
 <div id="replay-bar">
-  <button class="btn btn-blue" style="padding:4px 10px;font-size:0.75rem" id="replay-play-btn">▶</button>
+  <button class="btn btn-blue" style="padding:4px 9px;font-size:0.73rem" id="replay-play-btn">▶</button>
   <input type="range" id="replay-slider" min="0" max="100" value="0"/>
   <span id="replay-time">00:00:00</span>
-  <select id="replay-speed">
+  <select id="replay-speed" style="background:#334155;border:none;color:#e2e8f0;border-radius:4px;padding:3px 6px;font-size:0.73rem">
     <option value="1">1x</option>
     <option value="5">5x</option>
     <option value="10" selected>10x</option>
     <option value="30">30x</option>
     <option value="60">60x</option>
   </select>
-  <button class="btn btn-gray" style="padding:4px 10px;font-size:0.75rem" id="replay-stop-btn">✕</button>
+  <button class="btn btn-gray" style="padding:4px 9px;font-size:0.73rem" id="replay-stop-btn">✕</button>
 </div>
 
 <script type="module">
@@ -112,26 +180,42 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const map = L.map('map').setView([46.2276, 2.2137], 6);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+// ── Tile layers ──
+const LAYERS = {
+  osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }),
+  satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution:'© Esri' }),
+  topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution:'© OpenTopoMap' }),
+  dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution:'© CartoDB' }),
+  parchment: L.tileLayer('https://stamen-tiles.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.jpg', { attribution:'© Stamen' })
+};
 
+const map = L.map('map', { layers: [LAYERS.osm] }).setView([46.2276, 2.2137], 6);
+let currentLayer = 'osm';
+
+document.querySelectorAll('input[name=layer]').forEach(r => {
+  r.addEventListener('change', e => {
+    map.removeLayer(LAYERS[currentLayer]);
+    currentLayer = e.target.value;
+    map.addLayer(LAYERS[currentLayer]);
+  });
+});
+
+// ── State ──
 let currentEventCode = null;
 let myParticipantId = null;
 let trackingInterval = null;
-let liveMarkers = {};
-let livePolylines = {};
-let liveTrails = {}; // pid -> array of [lat,lng]
+let liveMarkers = {}, livePolylines = {}, liveTrails = {};
 let liveUnsub = null;
-let replayData = {};
-let replayInterval = null;
-let replayPlaying = false;
-let replayIndex = 0;
-let replayTimestamps = [];
-let replaySpeed = 10;
+let replayData = {}, replayInterval = null, replayPlaying = false;
+let replayIndex = 0, replayTimestamps = [], replaySpeed = 10;
+let pickMode = null; // 'start' | 'end' | 'wp-N'
+let wpCount = 0;
+
+// Event markers (start/end/waypoints)
+let eventMarkers = [];
 
 const COLORS = ['#ef4444','#3b82f6','#22c55e','#f97316','#a855f7','#eab308','#06b6d4','#ec4899'];
-const participantColors = {};
-const participantStats = {}; // pid -> { distance, joinedAt, lastTs, lastLat, lastLng, pseudo }
+const participantColors = {}, participantStats = {};
 let colorIdx = 0;
 
 function getColor(id) {
@@ -141,89 +225,164 @@ function getColor(id) {
 
 function makeIcon(color) {
   return L.divIcon({
-    html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 6px rgba(0,0,0,0.5)"></div>`,
-    className: '', iconSize: [14,14], iconAnchor: [7,7]
+    html:`<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 6px rgba(0,0,0,0.5)"></div>`,
+    className:'', iconSize:[14,14], iconAnchor:[7,7]
   });
 }
 
-function haversine(lat1, lng1, lat2, lng2) {
-  const R = 6371000;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+function makeEventIcon(symbol, color) {
+  return L.divIcon({
+    html:`<div style="background:${color};color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid white;box-shadow:0 0 8px rgba(0,0,0,0.4)">${symbol}</div>`,
+    className:'', iconSize:[28,28], iconAnchor:[14,14]
+  });
 }
 
-function formatDist(m) {
-  return m < 1000 ? `${Math.round(m)} m` : `${(m/1000).toFixed(2)} km`;
+function haversine(lat1,lng1,lat2,lng2) {
+  const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
+
+function formatDist(m) { return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(2)} km`; }
 
 function buildPopup(pid) {
-  const s = participantStats[pid];
-  if (!s) return '';
+  const s = participantStats[pid]; if (!s) return '';
   const now = Date.now();
-  const elapsed = (now - s.joinedAt) / 3600000; // heures
-  const speed = elapsed > 0 ? (s.distance / 1000) / elapsed : 0;
-  const inactiveMin = Math.floor((now - s.lastTs) / 60000);
-  const inactiveStr = inactiveMin < 1 ? 'actif' : `inactif depuis ${inactiveMin} min`;
-  const inactiveColor = inactiveMin >= 10 ? '#ef4444' : inactiveMin >= 3 ? '#f97316' : '#4ade80';
-  return `
-    <div style="min-width:160px;font-family:system-ui;font-size:13px">
-      <b style="font-size:14px">${s.pseudo}</b>
-      <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">
-        <span>📍 ${formatDist(s.distance)}</span>
-        <span>⚡ ${speed.toFixed(2)} km/h</span>
-        <span style="color:${inactiveColor}">● ${inactiveStr}</span>
-      </div>
+  const elapsed = (now-s.joinedAt)/3600000;
+  const speed = elapsed>0?(s.distance/1000)/elapsed:0;
+  const inactiveMin = Math.floor((now-s.lastTs)/60000);
+  const inactiveStr = inactiveMin<1?'actif':`inactif depuis ${inactiveMin} min`;
+  const inactiveColor = inactiveMin>=10?'#ef4444':inactiveMin>=3?'#f97316':'#4ade80';
+  return `<div style="min-width:160px;font-family:system-ui;font-size:13px">
+    <b style="font-size:14px">${s.pseudo}</b>
+    <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">
+      <span>📍 ${formatDist(s.distance)}</span>
+      <span>⚡ ${speed.toFixed(2)} km/h</span>
+      <span style="color:${inactiveColor}">● ${inactiveStr}</span>
     </div>
-  `;
+  </div>`;
 }
 
-function setStatus(msg, cls) {
-  const el = document.getElementById('status');
-  el.textContent = msg;
-  el.className = cls || '';
+// ── Pick mode ──
+function enterPickMode(target) {
+  pickMode = target;
+  document.getElementById('panel').style.display = 'none';
+  document.getElementById('pick-banner').style.display = 'block';
+  map.getContainer().style.cursor = 'crosshair';
 }
 
+map.on('click', e => {
+  if (!pickMode) return;
+  const { lat, lng } = e.latlng;
+  const latF = lat.toFixed(6), lngF = lng.toFixed(6);
+  if (pickMode === 'start') {
+    document.getElementById('start-lat').value = latF;
+    document.getElementById('start-lng').value = lngF;
+  } else if (pickMode === 'end') {
+    document.getElementById('end-lat').value = latF;
+    document.getElementById('end-lng').value = lngF;
+  } else if (pickMode.startsWith('wp-')) {
+    const idx = pickMode.split('-')[1];
+    document.getElementById(`wp-lat-${idx}`).value = latF;
+    document.getElementById(`wp-lng-${idx}`).value = lngF;
+  }
+  pickMode = null;
+  document.getElementById('pick-banner').style.display = 'none';
+  map.getContainer().style.cursor = '';
+  document.getElementById('panel').style.display = 'block';
+});
+
+// ── Panel ──
 function showPanel(mode) {
   document.getElementById('panel').style.display = 'block';
   ['join','create','watch'].forEach(m => document.getElementById('panel-'+m).style.display = m===mode?'block':'none');
-  const titles = { join:'Rejoindre un événement', create:'Créer un événement', watch:'Observer en direct' };
+  const titles = { join:'Rejoindre', create:'Créer un événement', watch:'Observer en direct' };
   document.getElementById('panel-title').textContent = titles[mode];
 }
 
-function closePanel() {
-  document.getElementById('panel').style.display = 'none';
+function closePanel() { document.getElementById('panel').style.display = 'none'; }
+
+function setStatus(msg, cls) {
+  const el = document.getElementById('status');
+  el.textContent = msg; el.className = cls||'';
 }
 
+// ── Waypoints UI ──
+document.getElementById('btn-add-wp').addEventListener('click', () => {
+  if (wpCount >= 5) return alert('Maximum 5 étapes');
+  const idx = wpCount++;
+  const container = document.getElementById('waypoints-container');
+  const div = document.createElement('div');
+  div.id = `wp-block-${idx}`;
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+      <span style="font-size:0.78rem;color:#94a3b8">Étape ${idx+1}</span>
+      <button class="btn btn-red" style="padding:2px 7px;font-size:0.7rem" onclick="removeWp(${idx})">✕</button>
+    </div>
+    <input id="wp-label-${idx}" placeholder="Nom de l'étape" style="width:100%;padding:6px 9px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:0.82rem;margin-bottom:5px"/>
+    <div style="display:flex;gap:6px;margin-bottom:5px">
+      <input id="wp-lat-${idx}" placeholder="Latitude" style="flex:1;padding:6px 9px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:0.82rem"/>
+      <input id="wp-lng-${idx}" placeholder="Longitude" style="flex:1;padding:6px 9px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:0.82rem"/>
+    </div>
+    <button class="btn btn-gray btn-pick" style="width:100%;margin-bottom:8px" onclick="pickWp(${idx})">📍 Placer sur la carte</button>
+  `;
+  container.appendChild(div);
+});
+
+window.removeWp = (idx) => {
+  document.getElementById(`wp-block-${idx}`)?.remove();
+};
+
+window.pickWp = (idx) => enterPickMode(`wp-${idx}`);
+
+// ── Draw event markers on map ──
+function drawEventPoints(eventData) {
+  eventMarkers.forEach(m => map.removeLayer(m));
+  eventMarkers = [];
+  if (eventData.start?.lat) {
+    const m = L.marker([eventData.start.lat, eventData.start.lng], { icon: makeEventIcon('🟢','#22c55e') })
+      .addTo(map).bindPopup(`<b>Départ</b><br>${eventData.start.label||''}`);
+    eventMarkers.push(m);
+  }
+  if (eventData.end?.lat) {
+    const m = L.marker([eventData.end.lat, eventData.end.lng], { icon: makeEventIcon('🔴','#ef4444') })
+      .addTo(map).bindPopup(`<b>Arrivée</b><br>${eventData.end.label||''}`);
+    eventMarkers.push(m);
+  }
+  if (eventData.waypoints) {
+    Object.values(eventData.waypoints).forEach((wp, i) => {
+      if (!wp.lat) return;
+      const m = L.marker([wp.lat, wp.lng], { icon: makeEventIcon(i+1,'#f97316') })
+        .addTo(map).bindPopup(`<b>Étape ${i+1}</b><br>${wp.label||''}`);
+      eventMarkers.push(m);
+    });
+  }
+}
+
+// ── Watch ──
 async function startWatching(code) {
   if (liveUnsub) liveUnsub();
 
-  // Charger l'historique existant pour reconstruire les trails
+  // Charger l'event pour les points départ/arrivée/étapes
+  const evSnap = await get(ref(db, `events/${code}`));
+  if (evSnap.exists()) drawEventPoints(evSnap.val());
+
+  // Historique
   const histSnap = await get(ref(db, `history/${code}`));
   const histData = histSnap.val() || {};
   Object.entries(histData).forEach(([pid, entries]) => {
-    const sorted = Object.values(entries).sort((a, b) => a.ts - b.ts);
+    const sorted = Object.values(entries).sort((a,b) => a.ts-b.ts);
     liveTrails[pid] = sorted.map(e => [e.lat, e.lng]);
     const color = getColor(pid);
     if (livePolylines[pid]) map.removeLayer(livePolylines[pid]);
-    livePolylines[pid] = L.polyline(liveTrails[pid], { color, weight: 3, opacity: 0.7 }).addTo(map);
-
-    // Reconstruire les stats depuis l'historique
-    let dist = 0;
-    for (let i = 1; i < sorted.length; i++) {
-      const d = haversine(sorted[i-1].lat, sorted[i-1].lng, sorted[i].lat, sorted[i].lng);
-      if (d > 5) dist += d; // ignorer < 5m (bruit GPS)
+    livePolylines[pid] = L.polyline(liveTrails[pid], { color, weight:3, opacity:0.7 }).addTo(map);
+    let dist=0;
+    for (let i=1;i<sorted.length;i++) {
+      const d=haversine(sorted[i-1].lat,sorted[i-1].lng,sorted[i].lat,sorted[i].lng);
+      if (d>5) dist+=d;
     }
-    const last = sorted[sorted.length - 1];
-    participantStats[pid] = {
-      pseudo: last.pseudo || pid,
-      distance: dist,
-      joinedAt: sorted[0].ts,
-      lastTs: last.ts,
-      lastLat: last.lat,
-      lastLng: last.lng
-    };
+    const last = sorted[sorted.length-1];
+    participantStats[pid] = { pseudo:last.pseudo||pid, distance:dist, joinedAt:sorted[0].ts, lastTs:last.ts, lastLat:last.lat, lastLng:last.lng };
   });
 
   // Rafraîchir les popups ouvertes toutes les minutes
@@ -233,7 +392,7 @@ async function startWatching(code) {
     });
   }, 60000);
 
-  // Puis écouter les positions live
+  // Live positions
   liveUnsub = onValue(ref(db, `positions/${code}`), snap => {
     const data = snap.val() || {};
     Object.keys(liveMarkers).forEach(id => {
@@ -248,211 +407,225 @@ async function startWatching(code) {
     let count = 0;
     Object.entries(data).forEach(([id, p]) => {
       const color = getColor(id);
-
-      // Mettre à jour les stats
       if (!participantStats[id]) {
-        participantStats[id] = { pseudo: p.pseudo, distance: 0, joinedAt: p.ts || Date.now(), lastTs: p.ts || Date.now(), lastLat: p.lat, lastLng: p.lng };
+        participantStats[id] = { pseudo:p.pseudo, distance:0, joinedAt:p.ts||Date.now(), lastTs:p.ts||Date.now(), lastLat:p.lat, lastLng:p.lng };
       } else {
         const s = participantStats[id];
-        const d = haversine(s.lastLat, s.lastLng, p.lat, p.lng);
-        if (d > 5) { s.distance += d; s.lastLat = p.lat; s.lastLng = p.lng; }
-        if (p.ts && p.ts > s.lastTs) s.lastTs = p.ts;
-        s.pseudo = p.pseudo;
+        const d = haversine(s.lastLat,s.lastLng,p.lat,p.lng);
+        if (d>5) { s.distance+=d; s.lastLat=p.lat; s.lastLng=p.lng; }
+        if (p.ts&&p.ts>s.lastTs) s.lastTs=p.ts;
+        s.pseudo=p.pseudo;
       }
-
       if (liveMarkers[id]) {
-        liveMarkers[id].setLatLng([p.lat, p.lng]);
+        liveMarkers[id].setLatLng([p.lat,p.lng]);
         liveMarkers[id].setPopupContent(buildPopup(id));
       } else {
-        liveMarkers[id] = L.marker([p.lat, p.lng], { icon: makeIcon(color) })
-          .addTo(map)
-          .bindPopup(buildPopup(id), { autoPan: false });
-        // Survol souris
-        liveMarkers[id].on('mouseover', function() { this.openPopup(); });
-        // Tap mobile
-        liveMarkers[id].on('click', function() { this.openPopup(); });
-        if (!liveTrails[id]) liveTrails[id] = [];
+        liveMarkers[id] = L.marker([p.lat,p.lng], { icon:makeIcon(color) }).addTo(map)
+          .bindPopup(buildPopup(id), { autoPan:false });
+        liveMarkers[id].on('mouseover', function(){ this.openPopup(); });
+        liveMarkers[id].on('click', function(){ this.openPopup(); });
+        if (!liveTrails[id]) liveTrails[id]=[];
       }
-      // Ajouter au trail si position différente
-      const trail = liveTrails[id] || [];
-      const last = trail[trail.length - 1];
-      if (!last || last[0] !== p.lat || last[1] !== p.lng) {
-        trail.push([p.lat, p.lng]);
-        liveTrails[id] = trail;
-        if (livePolylines[id]) {
-          livePolylines[id].setLatLngs(trail);
-        } else {
-          livePolylines[id] = L.polyline(trail, { color, weight: 3, opacity: 0.7 }).addTo(map);
-        }
+      const trail=liveTrails[id]||[];
+      const last=trail[trail.length-1];
+      if (!last||last[0]!==p.lat||last[1]!==p.lng) {
+        trail.push([p.lat,p.lng]);
+        liveTrails[id]=trail;
+        if (livePolylines[id]) livePolylines[id].setLatLngs(trail);
+        else livePolylines[id]=L.polyline(trail,{color,weight:3,opacity:0.7}).addTo(map);
       }
-      plist.innerHTML += `<div class="participant-item"><div class="participant-dot" style="background:${color}"></div>${p.pseudo}</div>`;
+      plist.innerHTML+=`<div class="participant-item"><div class="participant-dot" style="background:${color}"></div>${p.pseudo}</div>`;
       count++;
     });
-    document.getElementById('count').textContent = count;
-    if (count === 1) {
-      const first = Object.values(data)[0];
-      map.setView([first.lat, first.lng], 13);
-    }
+    document.getElementById('count').textContent=count;
+    if (count===1) { const f=Object.values(data)[0]; map.setView([f.lat,f.lng],13); }
   });
 }
 
+function clearMap() {
+  Object.values(liveMarkers).forEach(m=>map.removeLayer(m));
+  Object.values(livePolylines).forEach(p=>map.removeLayer(p));
+  eventMarkers.forEach(m=>map.removeLayer(m));
+  liveMarkers={}; livePolylines={}; liveTrails={}; eventMarkers=[];
+}
+
+// ── Replay ──
 function renderReplayFrame(idx) {
   const ts = replayTimestamps[idx];
   Object.entries(replayData).forEach(([pid, entries]) => {
-    const times = Object.keys(entries).map(Number).filter(t => t <= ts).sort((a,b) => b-a);
-    if (!times.length) {
-      if (liveMarkers[pid]) { map.removeLayer(liveMarkers[pid]); delete liveMarkers[pid]; }
-      return;
-    }
-    const pos = entries[times[0]];
-    const color = getColor(pid);
-    if (liveMarkers[pid]) {
-      liveMarkers[pid].setLatLng([pos.lat, pos.lng]);
-    } else {
-      liveMarkers[pid] = L.marker([pos.lat, pos.lng], { icon: makeIcon(color) }).addTo(map).bindPopup(`<b>${pos.pseudo||pid}</b>`);
-    }
+    const times = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>b-a);
+    if (!times.length) { if(liveMarkers[pid]){map.removeLayer(liveMarkers[pid]);delete liveMarkers[pid];} return; }
+    const pos=entries[times[0]];
+    const color=getColor(pid);
+    if (liveMarkers[pid]) liveMarkers[pid].setLatLng([pos.lat,pos.lng]);
+    else liveMarkers[pid]=L.marker([pos.lat,pos.lng],{icon:makeIcon(color)}).addTo(map).bindPopup(`<b>${pos.pseudo||pid}</b>`);
+    // Trail up to ts
+    const trail = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>a-b).map(t=>[entries[t].lat,entries[t].lng]);
+    if (livePolylines[pid]) livePolylines[pid].setLatLngs(trail);
+    else livePolylines[pid]=L.polyline(trail,{color,weight:3,opacity:0.7}).addTo(map);
   });
-  document.getElementById('replay-slider').value = idx;
-  const elapsed = ts - replayTimestamps[0];
-  const h = Math.floor(elapsed/3600000);
-  const m = Math.floor((elapsed%3600000)/60000);
-  const s = Math.floor((elapsed%60000)/1000);
-  document.getElementById('replay-time').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('replay-slider').value=idx;
+  const elapsed=ts-replayTimestamps[0];
+  const h=Math.floor(elapsed/3600000), m=Math.floor((elapsed%3600000)/60000), s=Math.floor((elapsed%60000)/1000);
+  document.getElementById('replay-time').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
-// --- Event listeners ---
-
-document.getElementById('btn-join').addEventListener('click', () => showPanel('join'));
-document.getElementById('btn-create').addEventListener('click', () => showPanel('create'));
-document.getElementById('btn-watch').addEventListener('click', () => showPanel('watch'));
+// ── Buttons ──
+document.getElementById('btn-join').addEventListener('click', ()=>showPanel('join'));
+document.getElementById('btn-create').addEventListener('click', ()=>showPanel('create'));
+document.getElementById('btn-watch').addEventListener('click', ()=>showPanel('watch'));
 document.getElementById('btn-close-panel').addEventListener('click', closePanel);
+document.getElementById('btn-pick-start').addEventListener('click', ()=>enterPickMode('start'));
+document.getElementById('btn-pick-end').addEventListener('click', ()=>enterPickMode('end'));
 
 document.getElementById('btn-do-create').addEventListener('click', async () => {
-  const name = document.getElementById('create-name').value.trim();
-  const code = document.getElementById('create-code').value.trim().toUpperCase();
-  const duration = parseInt(document.getElementById('create-duration').value) || 8;
-  if (!name || !code) return alert('Remplis tous les champs');
-  await set(ref(db, `events/${code}`), { name, code, createdAt: Date.now(), endsAt: Date.now() + duration*3600000, active: true });
+  const name=document.getElementById('create-name').value.trim();
+  const code=document.getElementById('create-code').value.trim().toUpperCase();
+  const duration=parseInt(document.getElementById('create-duration').value)||8;
+  if (!name||!code) return alert('Remplis le nom et le code');
+
+  // Vérifier unicité
+  const existing = await get(ref(db,`events/${code}`));
+  if (existing.exists()) return alert(`Le code "${code}" est déjà utilisé. Choisis un autre.`);
+
+  const eventData = { name, code, createdAt:Date.now(), endsAt:Date.now()+duration*3600000, active:true };
+
+  // Départ
+  const sLat=parseFloat(document.getElementById('start-lat').value);
+  const sLng=parseFloat(document.getElementById('start-lng').value);
+  const sLabel=document.getElementById('start-label').value.trim();
+  if (!isNaN(sLat)&&!isNaN(sLng)) eventData.start={ lat:sLat, lng:sLng, label:sLabel };
+
+  // Arrivée
+  const eLat=parseFloat(document.getElementById('end-lat').value);
+  const eLng=parseFloat(document.getElementById('end-lng').value);
+  const eLabel=document.getElementById('end-label').value.trim();
+  if (!isNaN(eLat)&&!isNaN(eLng)) eventData.end={ lat:eLat, lng:eLng, label:eLabel };
+
+  // Étapes
+  const wps=[];
+  for (let i=0;i<wpCount;i++) {
+    const el=document.getElementById(`wp-block-${i}`);
+    if (!el) continue;
+    const wLat=parseFloat(document.getElementById(`wp-lat-${i}`)?.value);
+    const wLng=parseFloat(document.getElementById(`wp-lng-${i}`)?.value);
+    const wLabel=document.getElementById(`wp-label-${i}`)?.value.trim()||`Étape ${i+1}`;
+    if (!isNaN(wLat)&&!isNaN(wLng)) wps.push({lat:wLat,lng:wLng,label:wLabel});
+  }
+  if (wps.length) eventData.waypoints=wps;
+
+  await set(ref(db,`events/${code}`), eventData);
   alert(`✅ Événement "${name}" créé !\nCode : ${code}`);
   closePanel();
 });
 
 document.getElementById('btn-do-join').addEventListener('click', async () => {
-  const code = document.getElementById('join-code').value.trim().toUpperCase();
-  const pseudo = document.getElementById('join-pseudo').value.trim();
-  if (!code || !pseudo) return alert('Remplis tous les champs');
-  const snap = await get(ref(db, `events/${code}`));
+  const code=document.getElementById('join-code').value.trim().toUpperCase();
+  const pseudo=document.getElementById('join-pseudo').value.trim();
+  if (!code||!pseudo) return alert('Remplis tous les champs');
+  const snap=await get(ref(db,`events/${code}`));
   if (!snap.exists()) return alert('Événement introuvable');
-
-  currentEventCode = code;
-  const partRef = push(ref(db, `positions/${code}`));
-  myParticipantId = partRef.key;
-
-  setStatus(`📍 Live — ${pseudo} @ ${code}`, 'live');
+  currentEventCode=code;
+  const partRef=push(ref(db,`positions/${code}`));
+  myParticipantId=partRef.key;
+  setStatus(`📍 Live — ${pseudo} @ ${code}`,'live');
   closePanel();
-  document.getElementById('btn-stop').style.display = 'inline-block';
-  document.getElementById('participants-list').style.display = 'block';
+  document.getElementById('btn-stop').style.display='inline-block';
+  document.getElementById('participants-list').style.display='block';
   startWatching(code);
-
-  const writePos = () => {
-    navigator.geolocation.getCurrentPosition(pos => {
-      set(ref(db, `positions/${code}/${myParticipantId}`), { pseudo, lat: pos.coords.latitude, lng: pos.coords.longitude, ts: Date.now() });
-      push(ref(db, `history/${code}/${myParticipantId}`), { pseudo, lat: pos.coords.latitude, lng: pos.coords.longitude, ts: Date.now() });
-    }, err => console.warn(err), { enableHighAccuracy: true });
+  const writePos=()=>{
+    navigator.geolocation.getCurrentPosition(pos=>{
+      set(ref(db,`positions/${code}/${myParticipantId}`),{pseudo,lat:pos.coords.latitude,lng:pos.coords.longitude,ts:Date.now()});
+      push(ref(db,`history/${code}/${myParticipantId}`),{pseudo,lat:pos.coords.latitude,lng:pos.coords.longitude,ts:Date.now()});
+    },err=>console.warn(err),{enableHighAccuracy:true});
   };
   writePos();
-  trackingInterval = setInterval(writePos, 5000);
+  trackingInterval=setInterval(writePos,5000);
 });
 
 document.getElementById('btn-do-watch').addEventListener('click', async () => {
-  const code = document.getElementById('watch-code').value.trim().toUpperCase();
+  const code=document.getElementById('watch-code').value.trim().toUpperCase();
   if (!code) return alert('Entre un code');
-  const snap = await get(ref(db, `events/${code}`));
+  const snap=await get(ref(db,`events/${code}`));
   if (!snap.exists()) return alert('Événement introuvable');
-  currentEventCode = code;
-  setStatus(`👁 Observation — ${code}`, 'live');
+  currentEventCode=code;
+  setStatus(`👁 Observation — ${code}`,'live');
   closePanel();
-  document.getElementById('participants-list').style.display = 'block';
-  document.getElementById('btn-replay').style.display = 'inline-block';
+  document.getElementById('participants-list').style.display='block';
+  document.getElementById('btn-replay').style.display='inline-block';
   startWatching(code);
 });
 
-document.getElementById('btn-stop').addEventListener('click', () => {
+document.getElementById('btn-stop').addEventListener('click', ()=>{
   if (trackingInterval) clearInterval(trackingInterval);
   if (liveUnsub) liveUnsub();
-  Object.values(liveMarkers).forEach(m => map.removeLayer(m));
-  Object.values(livePolylines).forEach(p => map.removeLayer(p));
-  liveMarkers = {}; livePolylines = {}; liveTrails = {};
-  document.getElementById('btn-stop').style.display = 'none';
-  document.getElementById('participants-list').style.display = 'none';
-  setStatus('En attente', '');
+  clearMap();
+  document.getElementById('btn-stop').style.display='none';
+  document.getElementById('participants-list').style.display='none';
+  setStatus('En attente','');
 });
 
-document.getElementById('btn-replay').addEventListener('click', async () => {
-  if (!currentEventCode) return alert('Observe un événement d\'abord');
-  setStatus('⏪ Chargement…', 'replay');
-  const snap = await get(ref(db, `history/${currentEventCode}`));
-  const raw = snap.val() || {};
-  replayData = {};
-  let allTs = new Set();
-  Object.entries(raw).forEach(([pid, entries]) => {
-    replayData[pid] = {};
-    Object.values(entries).forEach(e => { replayData[pid][e.ts] = { lat: e.lat, lng: e.lng, pseudo: e.pseudo||pid }; allTs.add(e.ts); });
+document.getElementById('btn-replay').addEventListener('click', async ()=>{
+  if (!currentEventCode) return alert("Observe un événement d'abord");
+  setStatus('⏪ Chargement…','replay');
+
+  // Basculer sur fond parchemin
+  map.removeLayer(LAYERS[currentLayer]);
+  map.addLayer(LAYERS.parchment);
+  document.querySelector('input[value=parchment]').checked=true;
+  currentLayer='parchment';
+
+  const snap=await get(ref(db,`history/${currentEventCode}`));
+  const raw=snap.val()||{};
+  replayData={};
+  let allTs=new Set();
+  Object.entries(raw).forEach(([pid,entries])=>{
+    replayData[pid]={};
+    Object.values(entries).forEach(e=>{replayData[pid][e.ts]={lat:e.lat,lng:e.lng,pseudo:e.pseudo||pid};allTs.add(e.ts);});
   });
-  replayTimestamps = Array.from(allTs).sort((a,b) => a-b);
-  if (replayTimestamps.length < 2) return alert('Pas assez de données pour un replay');
-  Object.values(liveMarkers).forEach(m => map.removeLayer(m));
-  liveMarkers = {};
+  replayTimestamps=Array.from(allTs).sort((a,b)=>a-b);
+  if (replayTimestamps.length<2) return alert('Pas assez de données pour un replay');
+  Object.values(liveMarkers).forEach(m=>map.removeLayer(m));
+  Object.values(livePolylines).forEach(p=>map.removeLayer(p));
+  liveMarkers={}; livePolylines={};
   document.getElementById('replay-bar').classList.add('visible');
-  document.getElementById('replay-slider').max = replayTimestamps.length - 1;
-  replayIndex = 0;
-  replayPlaying = false;
+  document.getElementById('replay-slider').max=replayTimestamps.length-1;
+  replayIndex=0; replayPlaying=false;
   renderReplayFrame(0);
-  setStatus('⏪ Replay prêt', 'replay');
+  setStatus('⏪ Replay prêt','replay');
 });
 
-document.getElementById('replay-play-btn').addEventListener('click', () => {
-  replayPlaying = !replayPlaying;
-  document.getElementById('replay-play-btn').textContent = replayPlaying ? '⏸' : '▶';
+document.getElementById('replay-play-btn').addEventListener('click', ()=>{
+  replayPlaying=!replayPlaying;
+  document.getElementById('replay-play-btn').textContent=replayPlaying?'⏸':'▶';
   if (replayPlaying) {
-    replayInterval = setInterval(() => {
-      if (replayIndex >= replayTimestamps.length - 1) {
-        replayPlaying = false; clearInterval(replayInterval);
-        document.getElementById('replay-play-btn').textContent = '▶';
-        return;
-      }
-      replayIndex++;
-      renderReplayFrame(replayIndex);
-    }, 200 / replaySpeed);
-  } else {
-    clearInterval(replayInterval);
-  }
+    replayInterval=setInterval(()=>{
+      if (replayIndex>=replayTimestamps.length-1){replayPlaying=false;clearInterval(replayInterval);document.getElementById('replay-play-btn').textContent='▶';return;}
+      replayIndex++;renderReplayFrame(replayIndex);
+    },200/replaySpeed);
+  } else clearInterval(replayInterval);
 });
 
-document.getElementById('replay-slider').addEventListener('input', e => {
-  replayIndex = parseInt(e.target.value);
-  renderReplayFrame(replayIndex);
+document.getElementById('replay-slider').addEventListener('input',e=>{replayIndex=parseInt(e.target.value);renderReplayFrame(replayIndex);});
+
+document.getElementById('replay-speed').addEventListener('change',e=>{
+  replaySpeed=parseInt(e.target.value);
+  if (replayPlaying){clearInterval(replayInterval);replayInterval=setInterval(()=>{if(replayIndex>=replayTimestamps.length-1){clearInterval(replayInterval);return;}replayIndex++;renderReplayFrame(replayIndex);},200/replaySpeed);}
 });
 
-document.getElementById('replay-speed').addEventListener('change', e => {
-  replaySpeed = parseInt(e.target.value);
-  if (replayPlaying) {
-    clearInterval(replayInterval);
-    replayInterval = setInterval(() => {
-      if (replayIndex >= replayTimestamps.length - 1) { clearInterval(replayInterval); return; }
-      replayIndex++;
-      renderReplayFrame(replayIndex);
-    }, 200 / replaySpeed);
-  }
-});
-
-document.getElementById('replay-stop-btn').addEventListener('click', () => {
+document.getElementById('replay-stop-btn').addEventListener('click', ()=>{
   clearInterval(replayInterval);
-  replayPlaying = false;
+  replayPlaying=false;
   document.getElementById('replay-bar').classList.remove('visible');
-  Object.values(liveMarkers).forEach(m => map.removeLayer(m));
-  liveMarkers = {};
-  setStatus('👁 Observation', 'live');
+  Object.values(liveMarkers).forEach(m=>map.removeLayer(m));
+  Object.values(livePolylines).forEach(p=>map.removeLayer(p));
+  liveMarkers={}; livePolylines={};
+  // Revenir au fond OSM
+  map.removeLayer(LAYERS[currentLayer]);
+  map.addLayer(LAYERS.osm);
+  document.querySelector('input[value=osm]').checked=true;
+  currentLayer='osm';
+  setStatus('👁 Observation','live');
   if (currentEventCode) startWatching(currentEventCode);
 });
 
