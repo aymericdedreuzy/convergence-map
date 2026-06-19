@@ -131,6 +131,7 @@ let replaySpeed = 10;
 
 const COLORS = ['#ef4444','#3b82f6','#22c55e','#f97316','#a855f7','#eab308','#06b6d4','#ec4899'];
 const participantColors = {};
+const participantStats = {}; // pid -> { distance, joinedAt, lastTs, lastLat, lastLng, pseudo }
 let colorIdx = 0;
 
 function getColor(id) {
@@ -143,6 +144,39 @@ function makeIcon(color) {
     html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 6px rgba(0,0,0,0.5)"></div>`,
     className: '', iconSize: [14,14], iconAnchor: [7,7]
   });
+}
+
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function formatDist(m) {
+  return m < 1000 ? `${Math.round(m)} m` : `${(m/1000).toFixed(2)} km`;
+}
+
+function buildPopup(pid) {
+  const s = participantStats[pid];
+  if (!s) return '';
+  const now = Date.now();
+  const elapsed = (now - s.joinedAt) / 3600000; // heures
+  const speed = elapsed > 0 ? (s.distance / 1000) / elapsed : 0;
+  const inactiveMin = Math.floor((now - s.lastTs) / 60000);
+  const inactiveStr = inactiveMin < 1 ? 'actif' : `inactif depuis ${inactiveMin} min`;
+  const inactiveColor = inactiveMin >= 10 ? '#ef4444' : inactiveMin >= 3 ? '#f97316' : '#4ade80';
+  return `
+    <div style="min-width:160px;font-family:system-ui;font-size:13px">
+      <b style="font-size:14px">${s.pseudo}</b>
+      <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">
+        <span>📍 ${formatDist(s.distance)}</span>
+        <span>⚡ ${speed.toFixed(2)} km/h</span>
+        <span style="color:${inactiveColor}">● ${inactiveStr}</span>
+      </div>
+    </div>
+  `;
 }
 
 function setStatus(msg, cls) {
@@ -162,8 +196,44 @@ function closePanel() {
   document.getElementById('panel').style.display = 'none';
 }
 
-function startWatching(code) {
+async function startWatching(code) {
   if (liveUnsub) liveUnsub();
+
+  // Charger l'historique existant pour reconstruire les trails
+  const histSnap = await get(ref(db, `history/${code}`));
+  const histData = histSnap.val() || {};
+  Object.entries(histData).forEach(([pid, entries]) => {
+    const sorted = Object.values(entries).sort((a, b) => a.ts - b.ts);
+    liveTrails[pid] = sorted.map(e => [e.lat, e.lng]);
+    const color = getColor(pid);
+    if (livePolylines[pid]) map.removeLayer(livePolylines[pid]);
+    livePolylines[pid] = L.polyline(liveTrails[pid], { color, weight: 3, opacity: 0.7 }).addTo(map);
+
+    // Reconstruire les stats depuis l'historique
+    let dist = 0;
+    for (let i = 1; i < sorted.length; i++) {
+      const d = haversine(sorted[i-1].lat, sorted[i-1].lng, sorted[i].lat, sorted[i].lng);
+      if (d > 5) dist += d; // ignorer < 5m (bruit GPS)
+    }
+    const last = sorted[sorted.length - 1];
+    participantStats[pid] = {
+      pseudo: last.pseudo || pid,
+      distance: dist,
+      joinedAt: sorted[0].ts,
+      lastTs: last.ts,
+      lastLat: last.lat,
+      lastLng: last.lng
+    };
+  });
+
+  // Rafraîchir les popups ouvertes toutes les minutes
+  setInterval(() => {
+    Object.entries(liveMarkers).forEach(([pid, marker]) => {
+      if (marker.isPopupOpen()) marker.setPopupContent(buildPopup(pid));
+    });
+  }, 60000);
+
+  // Puis écouter les positions live
   liveUnsub = onValue(ref(db, `positions/${code}`), snap => {
     const data = snap.val() || {};
     Object.keys(liveMarkers).forEach(id => {
@@ -178,13 +248,32 @@ function startWatching(code) {
     let count = 0;
     Object.entries(data).forEach(([id, p]) => {
       const color = getColor(id);
+
+      // Mettre à jour les stats
+      if (!participantStats[id]) {
+        participantStats[id] = { pseudo: p.pseudo, distance: 0, joinedAt: p.ts || Date.now(), lastTs: p.ts || Date.now(), lastLat: p.lat, lastLng: p.lng };
+      } else {
+        const s = participantStats[id];
+        const d = haversine(s.lastLat, s.lastLng, p.lat, p.lng);
+        if (d > 5) { s.distance += d; s.lastLat = p.lat; s.lastLng = p.lng; }
+        if (p.ts && p.ts > s.lastTs) s.lastTs = p.ts;
+        s.pseudo = p.pseudo;
+      }
+
       if (liveMarkers[id]) {
         liveMarkers[id].setLatLng([p.lat, p.lng]);
+        liveMarkers[id].setPopupContent(buildPopup(id));
       } else {
-        liveMarkers[id] = L.marker([p.lat, p.lng], { icon: makeIcon(color) }).addTo(map).bindPopup(`<b>${p.pseudo}</b>`);
-        liveTrails[id] = [];
+        liveMarkers[id] = L.marker([p.lat, p.lng], { icon: makeIcon(color) })
+          .addTo(map)
+          .bindPopup(buildPopup(id), { autoPan: false });
+        // Survol souris
+        liveMarkers[id].on('mouseover', function() { this.openPopup(); });
+        // Tap mobile
+        liveMarkers[id].on('click', function() { this.openPopup(); });
+        if (!liveTrails[id]) liveTrails[id] = [];
       }
-      // Append to trail if position changed
+      // Ajouter au trail si position différente
       const trail = liveTrails[id] || [];
       const last = trail[trail.length - 1];
       if (!last || last[0] !== p.lat || last[1] !== p.lng) {
