@@ -565,6 +565,30 @@ document.getElementById('btn-stop').addEventListener('click', ()=>{
   setStatus('En attente','');
 });
 
+function interpolateTrack(points) {
+  // points : [{lat, lng, ts, pseudo}, ...] triés par ts
+  if (points.length < 2) return points;
+  const result = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i], b = points[i+1];
+    const dt = b.ts - a.ts;
+    // ~20 points interpolés entre chaque paire
+    const steps = Math.max(2, Math.round(dt / (dt / 20)));
+    for (let s = 0; s < steps; s++) {
+      const t = s / steps;
+      result.push({
+        lat: a.lat + (b.lat - a.lat) * t,
+        lng: a.lng + (b.lng - a.lng) * t,
+        ts: Math.round(a.ts + dt * t),
+        pseudo: a.pseudo,
+        interpolated: true
+      });
+    }
+  }
+  result.push(points[points.length - 1]); // dernier point réel
+  return result;
+}
+
 document.getElementById('btn-replay').addEventListener('click', async ()=>{
   if (!currentEventCode) return alert("Observe un événement d'abord");
   setStatus('⏪ Chargement…','replay');
@@ -579,10 +603,19 @@ document.getElementById('btn-replay').addEventListener('click', async ()=>{
   const raw=snap.val()||{};
   replayData={};
   let allTs=new Set();
-  Object.entries(raw).forEach(([pid,entries])=>{
+
+  Object.entries(raw).forEach(([pid, entries])=>{
+    // Trier les points réels
+    const sorted = Object.values(entries).sort((a,b)=>a.ts-b.ts);
+    // Interpoler
+    const interpolated = interpolateTrack(sorted);
     replayData[pid]={};
-    Object.values(entries).forEach(e=>{replayData[pid][e.ts]={lat:e.lat,lng:e.lng,pseudo:e.pseudo||pid};allTs.add(e.ts);});
+    interpolated.forEach(e=>{
+      replayData[pid][e.ts]={lat:e.lat, lng:e.lng, pseudo:e.pseudo||pid};
+      allTs.add(e.ts);
+    });
   });
+
   replayTimestamps=Array.from(allTs).sort((a,b)=>a-b);
   if (replayTimestamps.length<2) return alert('Pas assez de données pour un replay');
   Object.values(liveMarkers).forEach(m=>map.removeLayer(m));
