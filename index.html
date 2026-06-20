@@ -526,8 +526,14 @@ document.getElementById('btn-do-join').addEventListener('click', async () => {
   const snap=await get(ref(db,`events/${code}`));
   if (!snap.exists()) return alert('Événement introuvable');
   currentEventCode=code;
-  const partRef=push(ref(db,`positions/${code}`));
-  myParticipantId=partRef.key;
+
+  // ID persistant — réutilisé à chaque reconnexion
+  const storageKey = `participant_${code}`;
+  myParticipantId = localStorage.getItem(storageKey);
+  if (!myParticipantId) {
+    myParticipantId = crypto.randomUUID();
+    localStorage.setItem(storageKey, myParticipantId);
+  }
   setStatus(`📍 Live — ${pseudo} @ ${code}`,'live');
   closePanel();
   document.getElementById('btn-stop').style.display='inline-block';
