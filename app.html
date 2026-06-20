@@ -919,9 +919,76 @@ async function startVideoExport() {
   };
 
   recorder.start();
+
+  // ── Fond de carte : pré-charger les tuiles avec crossOrigin ──
+  const TILE_URLS = {
+    osm:       (z,x,y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
+    topo:      (z,x,y) => `https://a.tile.opentopomap.org/${z}/${x}/${y}.png`,
+    dark:      (z,x,y) => `https://a.basemaps.cartocdn.com/dark_all/${z}/${x}/${y}.png`,
+    parchment: (z,x,y) => `https://a.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}.png`,
+    satellite: null // Esri bloque CORS → fond uni
+  };
+
+  function getTileRange() {
+    const z = map.getZoom();
+    const bounds = map.getBounds();
+    const tileSize = 256;
+    const lngToX = (lng,z) => Math.floor((lng+180)/360*Math.pow(2,z));
+    const latToY = (lat,z) => {
+      const r=Math.PI/180;
+      return Math.floor((1-Math.log(Math.tan(lat*r)+1/Math.cos(lat*r))/Math.PI)/2*Math.pow(2,z));
+    };
+    return {
+      z, tileSize,
+      xMin:lngToX(bounds.getWest(),z), xMax:lngToX(bounds.getEast(),z),
+      yMin:latToY(bounds.getNorth(),z), yMax:latToY(bounds.getSouth(),z)
+    };
+  }
+
+  async function preloadTiles() {
+    const fn = TILE_URLS[currentLayer];
+    if (!fn) return null;
+    const { z, xMin, xMax, yMin, yMax } = getTileRange();
+    const tileMap = new Map();
+    const fetches = [];
+    for (let x=xMin; x<=xMax; x++) {
+      for (let y=yMin; y<=yMax; y++) {
+        fetches.push(
+          fetch(fn(z,x,y))
+            .then(r=>r.blob()).then(b=>createImageBitmap(b))
+            .then(bmp=>tileMap.set(`${x},${y}`,bmp))
+            .catch(()=>{})
+        );
+      }
+    }
+    await Promise.all(fetches);
+    return tileMap;
+  }
+
+  function drawTiles(ctx, tileMap) {
+    if (!tileMap) {
+      ctx.fillStyle = '#1a2233';
+      ctx.fillRect(0,0,W,H);
+      return;
+    }
+    const { z, tileSize, xMin, xMax, yMin, yMax } = getTileRange();
+    const nw = map.project(map.getBounds().getNorthWest(), z);
+    const offX = -(nw.x % tileSize);
+    const offY = -(nw.y % tileSize);
+    for (let x=xMin; x<=xMax; x++) {
+      for (let y=yMin; y<=yMax; y++) {
+        const bmp = tileMap.get(`${x},${y}`);
+        if (!bmp) continue;
+        ctx.drawImage(bmp, offX+(x-xMin)*tileSize, offY+(y-yMin)*tileSize, tileSize, tileSize);
+      }
+    }
+  }
+
+  setStatus('⏺ Chargement fond de carte…', 'replay');
+  const tileMap = await preloadTiles();
   setStatus('⏺ Export en cours…', 'replay');
 
-  // Helper : convertit lat/lng → pixel sur la carte Leaflet
+  // Helper : lat/lng → pixel Leaflet
   function latLngToPixel(lat, lng) {
     const pt = map.latLngToContainerPoint(L.latLng(lat, lng));
     return { x: pt.x, y: pt.y };
@@ -1012,6 +1079,9 @@ async function startVideoExport() {
         const ts = replayTimestamps[idx];
         ctx.clearRect(0, 0, W, H);
 
+        // Fond de carte
+        drawTiles(ctx, tileMap);
+
         // Dessiner trails + markers
         Object.entries(replayData).forEach(([pid, entries]) => {
           const color = getColor(pid);
@@ -1035,15 +1105,23 @@ async function startVideoExport() {
         // Watermark
         drawWatermark(ctx, W, H);
 
-        // Timestamp
-        const elapsed = ts - replayTimestamps[0];
-        const h=Math.floor(elapsed/3600000), m=Math.floor((elapsed%3600000)/60000), s=Math.floor((elapsed%60000)/1000);
-        const timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-        ctx.font = '500 12px system-ui, sans-serif';
-        ctx.fillStyle = 'rgba(148,163,184,0.9)';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'top';
-        ctx.fillText(timeStr, W - 16, 16);
+        // Timestamp — date et heure réelles
+        const realDate = new Date(ts);
+        const dateStr = realDate.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
+        const timeStr = realDate.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        const fullStr = `${dateStr}  ${timeStr}`;
+        ctx.font = '600 12px system-ui, sans-serif';
+        const tw2 = ctx.measureText(fullStr).width;
+        const bw2 = tw2 + 18, bh2 = 24;
+        const bx2 = W - bw2 - 12, by2 = 12;
+        ctx.beginPath();
+        ctx.roundRect(bx2, by2, bw2, bh2, 6);
+        ctx.fillStyle = 'rgba(15,23,42,0.75)';
+        ctx.fill();
+        ctx.fillStyle = 'rgba(148,163,184,0.95)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(fullStr, bx2 + bw2/2, by2 + bh2/2);
 
         idx += framesPerTick;
         setTimeout(step, 33); // ~30fps canvas, vitesse via framesPerTick
