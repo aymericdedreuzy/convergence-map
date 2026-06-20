@@ -24,7 +24,7 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
 #status.live { background:#14532d; color:#4ade80; }
 #status.replay { background:#1e3a5f; color:#60a5fa; }
 
-#map { flex:1; }
+#map { flex:1; position:relative; }
 
 /* Panel */
 #panel { position:absolute; top:60px; left:14px; z-index:1000; background:#1e293b; border:1px solid #334155; border-radius:10px; padding:14px; width:280px; box-shadow:0 4px 20px rgba(0,0,0,0.4); display:none; max-height:calc(100vh - 80px); overflow-y:auto; }
@@ -44,20 +44,84 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
 .participant-item { display:flex; align-items:center; gap:7px; padding:4px 0; border-bottom:1px solid #334155; font-size:0.78rem; }
 .participant-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
 
-/* Layer control custom */
+/* Layer control */
 #layer-control { position:absolute; bottom:80px; right:14px; z-index:1000; background:#1e293b; border:1px solid #334155; border-radius:10px; padding:10px 14px; box-shadow:0 4px 20px rgba(0,0,0,0.4); }
 #layer-control h3 { font-size:0.75rem; color:#94a3b8; margin-bottom:8px; text-transform:uppercase; }
 #layer-control label { display:flex; align-items:center; gap:7px; font-size:0.78rem; cursor:pointer; padding:3px 0; }
 #layer-control input[type=radio] { accent-color:#3b82f6; }
 
 /* Replay bar */
-#replay-bar { position:absolute; bottom:16px; left:50%; transform:translateX(-50%); z-index:1000; background:#1e293b; border:1px solid #334155; border-radius:10px; padding:10px 18px; display:none; align-items:center; gap:10px; box-shadow:0 4px 20px rgba(0,0,0,0.4); min-width:380px; }
+#replay-bar { position:absolute; bottom:16px; left:50%; transform:translateX(-50%); z-index:1000; background:#1e293b; border:1px solid #334155; border-radius:10px; padding:10px 18px; display:none; align-items:center; gap:10px; box-shadow:0 4px 20px rgba(0,0,0,0.4); min-width:420px; }
 #replay-bar.visible { display:flex; }
 #replay-slider { flex:1; accent-color:#3b82f6; }
 #replay-time { font-size:0.73rem; color:#94a3b8; white-space:nowrap; }
 
 /* Pick mode banner */
 #pick-banner { position:absolute; top:60px; left:50%; transform:translateX(-50%); z-index:2000; background:#f97316; color:white; padding:8px 20px; border-radius:8px; font-size:0.85rem; font-weight:600; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+
+/* ── WATERMARK REPLAY ── */
+#replay-watermark {
+  position:absolute;
+  bottom:70px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:999;
+  display:none;
+  pointer-events:none;
+  align-items:center;
+  gap:7px;
+  background:rgba(15,23,42,0.72);
+  border:1px solid rgba(56,189,248,0.25);
+  border-radius:20px;
+  padding:5px 14px;
+  backdrop-filter:blur(4px);
+}
+#replay-watermark.visible { display:flex; }
+#replay-watermark span { font-size:0.68rem; color:rgba(226,232,240,0.75); letter-spacing:0.04em; font-family:'DM Sans',system-ui,sans-serif; }
+#replay-watermark .wm-logo { font-size:0.75rem; color:#38bdf8; font-weight:700; }
+
+/* ── ÉCRAN DE FIN ── */
+#replay-end-screen {
+  position:absolute;
+  inset:0;
+  z-index:1100;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:rgba(10,17,32,0.88);
+  backdrop-filter:blur(8px);
+}
+#replay-end-screen.visible { display:flex; }
+.end-card {
+  background:#1e293b;
+  border:1px solid #334155;
+  border-radius:16px;
+  padding:36px 44px;
+  text-align:center;
+  max-width:440px;
+  width:90%;
+  box-shadow:0 8px 40px rgba(0,0,0,0.6);
+}
+.end-card h2 { font-size:1.3rem; font-weight:800; color:#e2e8f0; margin-bottom:4px; }
+.end-card .end-event-name { font-size:0.85rem; color:#38bdf8; margin-bottom:24px; font-weight:500; }
+.end-stats { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:28px; }
+.end-stat { background:#0f172a; border-radius:10px; padding:14px 10px; }
+.end-stat .val { font-size:1.5rem; font-weight:800; color:#e2e8f0; }
+.end-stat .lbl { font-size:0.68rem; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin-top:2px; }
+.end-branding { display:flex; align-items:center; justify-content:center; gap:8px; padding-top:20px; border-top:1px solid #334155; }
+.end-branding .brand-badge { font-size:0.72rem; color:#64748b; }
+.end-branding .brand-name { font-size:0.82rem; font-weight:700; color:#38bdf8; }
+.end-actions { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
+
+/* ── CANVAS EXPORT ── */
+#export-canvas {
+  display:none;
+  position:absolute;
+  inset:0;
+  z-index:1050;
+  pointer-events:none;
+}
 </style>
 </head>
 <body>
@@ -72,7 +136,53 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
   <span id="status">En attente</span>
 </div>
 
-<div id="map"></div>
+<div id="map">
+  <!-- Watermark replay -->
+  <div id="replay-watermark">
+    <span class="wm-logo">🗺️ Convergence Map</span>
+    <span>•</span>
+    <span>Créé avec Convergence Map</span>
+  </div>
+
+  <!-- Écran de fin -->
+  <div id="replay-end-screen">
+    <div class="end-card">
+      <h2>🏁 Fin du replay</h2>
+      <div class="end-event-name" id="end-event-name">—</div>
+      <div class="end-stats">
+        <div class="end-stat">
+          <div class="val" id="end-stat-participants">—</div>
+          <div class="lbl">Participants</div>
+        </div>
+        <div class="end-stat">
+          <div class="val" id="end-stat-duration">—</div>
+          <div class="lbl">Durée</div>
+        </div>
+        <div class="end-stat">
+          <div class="val" id="end-stat-distance">—</div>
+          <div class="lbl">Distance moy.</div>
+        </div>
+        <div class="end-stat">
+          <div class="val" id="end-stat-points">—</div>
+          <div class="lbl">Points GPS</div>
+        </div>
+      </div>
+      <div class="end-actions">
+        <button class="btn btn-blue" id="end-btn-restart">↩ Rejouer</button>
+        <button class="btn btn-purple" id="end-btn-export">⬇ Exporter MP4</button>
+        <button class="btn btn-gray" id="end-btn-close">✕ Fermer</button>
+      </div>
+      <div class="end-branding">
+        <span class="brand-badge">Créé avec</span>
+        <span class="brand-name">Convergence Map</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canvas export vidéo -->
+  <canvas id="export-canvas"></canvas>
+</div>
+
 <div id="pick-banner">📍 Cliquez sur la carte pour placer le point</div>
 
 <!-- Panel -->
@@ -85,6 +195,8 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
     <input id="join-code" placeholder="ex: PELE2025"/>
     <label>Votre pseudo</label>
     <input id="join-pseudo" placeholder="ex: Marie"/>
+    <label>Équipe <span style="color:#475569">(facultatif)</span></label>
+    <input id="join-team" placeholder="ex: Équipe Rouge"/>
     <button class="btn btn-blue" style="width:100%" id="btn-do-join">Rejoindre & partager ma position</button>
   </div>
 
@@ -118,7 +230,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
     <div class="section-title">Étapes (max 5, facultatif)</div>
     <div id="waypoints-container"></div>
     <button class="btn btn-gray" style="width:100%;margin-bottom:8px" id="btn-add-wp">+ Ajouter une étape</button>
-
     <button class="btn btn-green" style="width:100%" id="btn-do-create">Créer l'événement</button>
   </div>
 
@@ -160,6 +271,7 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
     <option value="30">30x</option>
     <option value="60">60x</option>
   </select>
+  <button class="btn btn-purple" style="padding:4px 9px;font-size:0.73rem" id="btn-record" title="Exporter MP4">⏺ MP4</button>
   <button class="btn btn-gray" style="padding:4px 9px;font-size:0.73rem" id="replay-stop-btn">✕</button>
 </div>
 
@@ -202,20 +314,20 @@ document.querySelectorAll('input[name=layer]').forEach(r => {
 
 // ── State ──
 let currentEventCode = null;
+let currentEventName = '';
 let myParticipantId = null;
 let trackingInterval = null;
 let liveMarkers = {}, livePolylines = {}, liveTrails = {};
 let liveUnsub = null;
 let replayData = {}, replayInterval = null, replayPlaying = false;
 let replayIndex = 0, replayTimestamps = [], replaySpeed = 10;
-let pickMode = null; // 'start' | 'end' | 'wp-N'
+let replayRawPoints = {}; // pid -> [{lat,lng,ts,pseudo,team}]
+let pickMode = null;
 let wpCount = 0;
-
-// Event markers (start/end/waypoints)
 let eventMarkers = [];
 
 const COLORS = ['#ef4444','#3b82f6','#22c55e','#f97316','#a855f7','#eab308','#06b6d4','#ec4899'];
-const participantColors = {}, participantStats = {};
+const participantColors = {}, participantStats = {}, participantTeams = {};
 let colorIdx = 0;
 
 function getColor(id) {
@@ -227,6 +339,17 @@ function makeIcon(color) {
   return L.divIcon({
     html:`<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 6px rgba(0,0,0,0.5)"></div>`,
     className:'', iconSize:[14,14], iconAnchor:[7,7]
+  });
+}
+
+function makeLabelIcon(color, pseudo, team) {
+  const label = team ? `${pseudo} · ${team}` : pseudo;
+  return L.divIcon({
+    html:`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+      <div style="background:rgba(15,23,42,0.85);color:white;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;border:1px solid ${color};white-space:nowrap;backdrop-filter:blur(3px)">${label}</div>
+      <div style="width:12px;height:12px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 0 6px rgba(0,0,0,0.5)"></div>
+    </div>`,
+    className:'', iconSize:[0,0], iconAnchor:[0,20]
   });
 }
 
@@ -243,7 +366,7 @@ function haversine(lat1,lng1,lat2,lng2) {
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-function formatDist(m) { return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(2)} km`; }
+function formatDist(m) { return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(1)} km`; }
 
 function buildPopup(pid) {
   const s = participantStats[pid]; if (!s) return '';
@@ -253,8 +376,9 @@ function buildPopup(pid) {
   const inactiveMin = Math.floor((now-s.lastTs)/60000);
   const inactiveStr = inactiveMin<1?'actif':`inactif depuis ${inactiveMin} min`;
   const inactiveColor = inactiveMin>=10?'#ef4444':inactiveMin>=3?'#f97316':'#4ade80';
+  const teamStr = s.team ? `<span style="color:#a855f7">👥 ${s.team}</span>` : '';
   return `<div style="min-width:160px;font-family:system-ui;font-size:13px">
-    <b style="font-size:14px">${s.pseudo}</b>
+    <b style="font-size:14px">${s.pseudo}</b>${s.team?`<br><span style="font-size:11px;color:#a855f7">👥 ${s.team}</span>`:''}
     <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">
       <span>📍 ${formatDist(s.distance)}</span>
       <span>⚡ ${speed.toFixed(2)} km/h</span>
@@ -329,13 +453,10 @@ document.getElementById('btn-add-wp').addEventListener('click', () => {
   container.appendChild(div);
 });
 
-window.removeWp = (idx) => {
-  document.getElementById(`wp-block-${idx}`)?.remove();
-};
-
+window.removeWp = (idx) => { document.getElementById(`wp-block-${idx}`)?.remove(); };
 window.pickWp = (idx) => enterPickMode(`wp-${idx}`);
 
-// ── Draw event markers on map ──
+// ── Draw event markers ──
 function drawEventPoints(eventData) {
   eventMarkers.forEach(m => map.removeLayer(m));
   eventMarkers = [];
@@ -362,12 +483,13 @@ function drawEventPoints(eventData) {
 // ── Watch ──
 async function startWatching(code) {
   if (liveUnsub) liveUnsub();
-
-  // Charger l'event pour les points départ/arrivée/étapes
   const evSnap = await get(ref(db, `events/${code}`));
-  if (evSnap.exists()) drawEventPoints(evSnap.val());
+  if (evSnap.exists()) {
+    const evData = evSnap.val();
+    drawEventPoints(evData);
+    currentEventName = evData.name || code;
+  }
 
-  // Historique
   const histSnap = await get(ref(db, `history/${code}`));
   const histData = histSnap.val() || {};
   Object.entries(histData).forEach(([pid, entries]) => {
@@ -382,17 +504,15 @@ async function startWatching(code) {
       if (d>5) dist+=d;
     }
     const last = sorted[sorted.length-1];
-    participantStats[pid] = { pseudo:last.pseudo||pid, distance:dist, joinedAt:sorted[0].ts, lastTs:last.ts, lastLat:last.lat, lastLng:last.lng };
+    participantStats[pid] = { pseudo:last.pseudo||pid, team:last.team||'', distance:dist, joinedAt:sorted[0].ts, lastTs:last.ts, lastLat:last.lat, lastLng:last.lng };
   });
 
-  // Rafraîchir les popups ouvertes toutes les minutes
   setInterval(() => {
     Object.entries(liveMarkers).forEach(([pid, marker]) => {
       if (marker.isPopupOpen()) marker.setPopupContent(buildPopup(pid));
     });
   }, 60000);
 
-  // Live positions
   liveUnsub = onValue(ref(db, `positions/${code}`), snap => {
     const data = snap.val() || {};
     Object.keys(liveMarkers).forEach(id => {
@@ -408,19 +528,20 @@ async function startWatching(code) {
     Object.entries(data).forEach(([id, p]) => {
       const color = getColor(id);
       if (!participantStats[id]) {
-        participantStats[id] = { pseudo:p.pseudo, distance:0, joinedAt:p.ts||Date.now(), lastTs:p.ts||Date.now(), lastLat:p.lat, lastLng:p.lng };
+        participantStats[id] = { pseudo:p.pseudo, team:p.team||'', distance:0, joinedAt:p.ts||Date.now(), lastTs:p.ts||Date.now(), lastLat:p.lat, lastLng:p.lng };
       } else {
         const s = participantStats[id];
         const d = haversine(s.lastLat,s.lastLng,p.lat,p.lng);
         if (d>5) { s.distance+=d; s.lastLat=p.lat; s.lastLng=p.lng; }
         if (p.ts&&p.ts>s.lastTs) s.lastTs=p.ts;
-        s.pseudo=p.pseudo;
+        s.pseudo=p.pseudo; s.team=p.team||'';
       }
       if (liveMarkers[id]) {
         liveMarkers[id].setLatLng([p.lat,p.lng]);
+        liveMarkers[id].setIcon(makeLabelIcon(color, p.pseudo, p.team||''));
         liveMarkers[id].setPopupContent(buildPopup(id));
       } else {
-        liveMarkers[id] = L.marker([p.lat,p.lng], { icon:makeIcon(color) }).addTo(map)
+        liveMarkers[id] = L.marker([p.lat,p.lng], { icon:makeLabelIcon(color, p.pseudo, p.team||'') }).addTo(map)
           .bindPopup(buildPopup(id), { autoPan:false });
         liveMarkers[id].on('mouseover', function(){ this.openPopup(); });
         liveMarkers[id].on('click', function(){ this.openPopup(); });
@@ -434,7 +555,8 @@ async function startWatching(code) {
         if (livePolylines[id]) livePolylines[id].setLatLngs(trail);
         else livePolylines[id]=L.polyline(trail,{color,weight:3,opacity:0.7}).addTo(map);
       }
-      plist.innerHTML+=`<div class="participant-item"><div class="participant-dot" style="background:${color}"></div>${p.pseudo}</div>`;
+      const teamStr = p.team ? ` <span style="color:#a855f7;font-size:0.7rem">· ${p.team}</span>` : '';
+      plist.innerHTML+=`<div class="participant-item"><div class="participant-dot" style="background:${color}"></div>${p.pseudo}${teamStr}</div>`;
       count++;
     });
     document.getElementById('count').textContent=count;
@@ -450,24 +572,71 @@ function clearMap() {
 }
 
 // ── Replay ──
+function showWatermark(visible) {
+  document.getElementById('replay-watermark').classList.toggle('visible', visible);
+}
+
+function showEndScreen(show) {
+  document.getElementById('replay-end-screen').classList.toggle('visible', show);
+}
+
+function fillEndStats() {
+  document.getElementById('end-event-name').textContent = currentEventName;
+  const nbParticipants = Object.keys(replayData).length;
+  document.getElementById('end-stat-participants').textContent = nbParticipants;
+
+  if (replayTimestamps.length >= 2) {
+    const totalMs = replayTimestamps[replayTimestamps.length-1] - replayTimestamps[0];
+    const h = Math.floor(totalMs/3600000), m = Math.floor((totalMs%3600000)/60000);
+    document.getElementById('end-stat-duration').textContent = h>0 ? `${h}h${String(m).padStart(2,'0')}` : `${m} min`;
+  }
+
+  // Distance moyenne par participant
+  let totalDist = 0;
+  Object.entries(replayRawPoints).forEach(([pid, pts]) => {
+    let d = 0;
+    for (let i=1;i<pts.length;i++) d += haversine(pts[i-1].lat,pts[i-1].lng,pts[i].lat,pts[i].lng);
+    totalDist += d;
+  });
+  const avgDist = nbParticipants > 0 ? totalDist/nbParticipants : 0;
+  document.getElementById('end-stat-distance').textContent = formatDist(avgDist);
+
+  // Total points GPS
+  let totalPts = 0;
+  Object.values(replayRawPoints).forEach(pts => totalPts += pts.length);
+  document.getElementById('end-stat-points').textContent = totalPts;
+}
+
 function renderReplayFrame(idx) {
   const ts = replayTimestamps[idx];
   Object.entries(replayData).forEach(([pid, entries]) => {
     const times = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>b-a);
     if (!times.length) { if(liveMarkers[pid]){map.removeLayer(liveMarkers[pid]);delete liveMarkers[pid];} return; }
-    const pos=entries[times[0]];
-    const color=getColor(pid);
-    if (liveMarkers[pid]) liveMarkers[pid].setLatLng([pos.lat,pos.lng]);
-    else liveMarkers[pid]=L.marker([pos.lat,pos.lng],{icon:makeIcon(color)}).addTo(map).bindPopup(`<b>${pos.pseudo||pid}</b>`);
-    // Trail up to ts
+    const pos = entries[times[0]];
+    const color = getColor(pid);
+    const team = pos.team || participantTeams[pid] || '';
+    if (liveMarkers[pid]) {
+      liveMarkers[pid].setLatLng([pos.lat,pos.lng]);
+      liveMarkers[pid].setIcon(makeLabelIcon(color, pos.pseudo||pid, team));
+    } else {
+      liveMarkers[pid] = L.marker([pos.lat,pos.lng],{icon:makeLabelIcon(color, pos.pseudo||pid, team)}).addTo(map)
+        .bindPopup(`<b>${pos.pseudo||pid}</b>${team?`<br><span style="color:#a855f7">👥 ${team}</span>`:''}`);
+    }
     const trail = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>a-b).map(t=>[entries[t].lat,entries[t].lng]);
     if (livePolylines[pid]) livePolylines[pid].setLatLngs(trail);
     else livePolylines[pid]=L.polyline(trail,{color,weight:3,opacity:0.7}).addTo(map);
   });
+
   document.getElementById('replay-slider').value=idx;
   const elapsed=ts-replayTimestamps[0];
   const h=Math.floor(elapsed/3600000), m=Math.floor((elapsed%3600000)/60000), s=Math.floor((elapsed%60000)/1000);
   document.getElementById('replay-time').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+  // Fin de replay
+  if (idx >= replayTimestamps.length-1) {
+    fillEndStats();
+    showEndScreen(true);
+  }
 }
 
 // ── Buttons ──
@@ -483,26 +652,17 @@ document.getElementById('btn-do-create').addEventListener('click', async () => {
   const code=document.getElementById('create-code').value.trim().toUpperCase();
   const duration=parseInt(document.getElementById('create-duration').value)||8;
   if (!name||!code) return alert('Remplis le nom et le code');
-
-  // Vérifier unicité
   const existing = await get(ref(db,`events/${code}`));
-  if (existing.exists()) return alert(`Le code "${code}" est déjà utilisé. Choisis un autre.`);
-
+  if (existing.exists()) return alert(`Le code "${code}" est déjà utilisé.`);
   const eventData = { name, code, createdAt:Date.now(), endsAt:Date.now()+duration*3600000, active:true };
-
-  // Départ
   const sLat=parseFloat(document.getElementById('start-lat').value);
   const sLng=parseFloat(document.getElementById('start-lng').value);
   const sLabel=document.getElementById('start-label').value.trim();
   if (!isNaN(sLat)&&!isNaN(sLng)) eventData.start={ lat:sLat, lng:sLng, label:sLabel };
-
-  // Arrivée
   const eLat=parseFloat(document.getElementById('end-lat').value);
   const eLng=parseFloat(document.getElementById('end-lng').value);
   const eLabel=document.getElementById('end-label').value.trim();
   if (!isNaN(eLat)&&!isNaN(eLng)) eventData.end={ lat:eLat, lng:eLng, label:eLabel };
-
-  // Étapes
   const wps=[];
   for (let i=0;i<wpCount;i++) {
     const el=document.getElementById(`wp-block-${i}`);
@@ -513,7 +673,6 @@ document.getElementById('btn-do-create').addEventListener('click', async () => {
     if (!isNaN(wLat)&&!isNaN(wLng)) wps.push({lat:wLat,lng:wLng,label:wLabel});
   }
   if (wps.length) eventData.waypoints=wps;
-
   await set(ref(db,`events/${code}`), eventData);
   alert(`✅ Événement "${name}" créé !\nCode : ${code}`);
   closePanel();
@@ -522,35 +681,33 @@ document.getElementById('btn-do-create').addEventListener('click', async () => {
 document.getElementById('btn-do-join').addEventListener('click', async () => {
   const code=document.getElementById('join-code').value.trim().toUpperCase();
   const pseudo=document.getElementById('join-pseudo').value.trim();
+  const team=document.getElementById('join-team').value.trim();
   if (!code||!pseudo) return alert('Remplis tous les champs');
   const snap=await get(ref(db,`events/${code}`));
   if (!snap.exists()) return alert('Événement introuvable');
   currentEventCode=code;
-
-  // ID persistant — réutilisé à chaque reconnexion
   const storageKey = `participant_${code}`;
   myParticipantId = localStorage.getItem(storageKey);
   if (!myParticipantId) {
     myParticipantId = crypto.randomUUID();
     localStorage.setItem(storageKey, myParticipantId);
   }
-  setStatus(`📍 Live — ${pseudo} @ ${code}`,'live');
+  setStatus(`📍 Live — ${pseudo}${team?' · '+team:''} @ ${code}`,'live');
   closePanel();
   document.getElementById('btn-stop').style.display='inline-block';
   document.getElementById('participants-list').style.display='block';
   startWatching(code);
-  // Wake Lock — empêche l'écran de se mettre en veille
+
   let wakeLock = null;
   const requestWakeLock = async () => {
     try {
       if ('wakeLock' in navigator) {
         wakeLock = await navigator.wakeLock.request('screen');
         wakeLock.addEventListener('release', async () => {
-          // Relancer si la page reste visible
           if (document.visibilityState === 'visible') await requestWakeLock();
         });
       }
-    } catch(e) { console.warn('Wake Lock non supporté:', e); }
+    } catch(e) { console.warn('Wake Lock:', e); }
   };
   document.addEventListener('visibilitychange', async () => {
     if (document.visibilityState === 'visible') await requestWakeLock();
@@ -559,8 +716,10 @@ document.getElementById('btn-do-join').addEventListener('click', async () => {
 
   const writePos=()=>{
     navigator.geolocation.getCurrentPosition(pos=>{
-      set(ref(db,`positions/${code}/${myParticipantId}`),{pseudo,lat:pos.coords.latitude,lng:pos.coords.longitude,ts:Date.now()});
-      push(ref(db,`history/${code}/${myParticipantId}`),{pseudo,lat:pos.coords.latitude,lng:pos.coords.longitude,ts:Date.now()});
+      const payload = { pseudo, lat:pos.coords.latitude, lng:pos.coords.longitude, ts:Date.now() };
+      if (team) payload.team = team;
+      set(ref(db,`positions/${code}/${myParticipantId}`), payload);
+      push(ref(db,`history/${code}/${myParticipantId}`), payload);
     },err=>console.warn(err),{enableHighAccuracy:true});
   };
   writePos();
@@ -582,7 +741,6 @@ document.getElementById('btn-do-watch').addEventListener('click', async () => {
 
 document.getElementById('btn-stop').addEventListener('click', ()=>{
   if (trackingInterval) clearInterval(trackingInterval);
-  if (wakeLock) { wakeLock.release(); wakeLock = null; }
   if (liveUnsub) liveUnsub();
   clearMap();
   document.getElementById('btn-stop').style.display='none';
@@ -591,13 +749,11 @@ document.getElementById('btn-stop').addEventListener('click', ()=>{
 });
 
 function interpolateTrack(points) {
-  // points : [{lat, lng, ts, pseudo}, ...] triés par ts
   if (points.length < 2) return points;
   const result = [];
   for (let i = 0; i < points.length - 1; i++) {
     const a = points[i], b = points[i+1];
     const dt = b.ts - a.ts;
-    // ~20 points interpolés entre chaque paire
     const steps = Math.max(2, Math.round(dt / (dt / 20)));
     for (let s = 0; s < steps; s++) {
       const t = s / steps;
@@ -606,11 +762,12 @@ function interpolateTrack(points) {
         lng: a.lng + (b.lng - a.lng) * t,
         ts: Math.round(a.ts + dt * t),
         pseudo: a.pseudo,
+        team: a.team || '',
         interpolated: true
       });
     }
   }
-  result.push(points[points.length - 1]); // dernier point réel
+  result.push(points[points.length - 1]);
   return result;
 }
 
@@ -618,7 +775,6 @@ document.getElementById('btn-replay').addEventListener('click', async ()=>{
   if (!currentEventCode) return alert("Observe un événement d'abord");
   setStatus('⏪ Chargement…','replay');
 
-  // Basculer sur fond parchemin
   map.removeLayer(LAYERS[currentLayer]);
   map.addLayer(LAYERS.parchment);
   document.querySelector('input[value=parchment]').checked=true;
@@ -626,17 +782,17 @@ document.getElementById('btn-replay').addEventListener('click', async ()=>{
 
   const snap=await get(ref(db,`history/${currentEventCode}`));
   const raw=snap.val()||{};
-  replayData={};
+  replayData={}; replayRawPoints={};
   let allTs=new Set();
 
   Object.entries(raw).forEach(([pid, entries])=>{
-    // Trier les points réels
     const sorted = Object.values(entries).sort((a,b)=>a.ts-b.ts);
-    // Interpoler
+    replayRawPoints[pid] = sorted;
+    if (sorted[0]?.team) participantTeams[pid] = sorted[0].team;
     const interpolated = interpolateTrack(sorted);
     replayData[pid]={};
     interpolated.forEach(e=>{
-      replayData[pid][e.ts]={lat:e.lat, lng:e.lng, pseudo:e.pseudo||pid};
+      replayData[pid][e.ts]={lat:e.lat, lng:e.lng, pseudo:e.pseudo||pid, team:e.team||''};
       allTs.add(e.ts);
     });
   });
@@ -649,6 +805,8 @@ document.getElementById('btn-replay').addEventListener('click', async ()=>{
   document.getElementById('replay-bar').classList.add('visible');
   document.getElementById('replay-slider').max=replayTimestamps.length-1;
   replayIndex=0; replayPlaying=false;
+  showWatermark(true);
+  showEndScreen(false);
   renderReplayFrame(0);
   setStatus('⏪ Replay prêt','replay');
 });
@@ -658,27 +816,42 @@ document.getElementById('replay-play-btn').addEventListener('click', ()=>{
   document.getElementById('replay-play-btn').textContent=replayPlaying?'⏸':'▶';
   if (replayPlaying) {
     replayInterval=setInterval(()=>{
-      if (replayIndex>=replayTimestamps.length-1){replayPlaying=false;clearInterval(replayInterval);document.getElementById('replay-play-btn').textContent='▶';return;}
-      replayIndex++;renderReplayFrame(replayIndex);
+      if (replayIndex>=replayTimestamps.length-1){
+        replayPlaying=false; clearInterval(replayInterval);
+        document.getElementById('replay-play-btn').textContent='▶';
+        return;
+      }
+      replayIndex++; renderReplayFrame(replayIndex);
     },200/replaySpeed);
   } else clearInterval(replayInterval);
 });
 
-document.getElementById('replay-slider').addEventListener('input',e=>{replayIndex=parseInt(e.target.value);renderReplayFrame(replayIndex);});
+document.getElementById('replay-slider').addEventListener('input',e=>{
+  replayIndex=parseInt(e.target.value);
+  showEndScreen(false);
+  renderReplayFrame(replayIndex);
+});
 
 document.getElementById('replay-speed').addEventListener('change',e=>{
   replaySpeed=parseInt(e.target.value);
-  if (replayPlaying){clearInterval(replayInterval);replayInterval=setInterval(()=>{if(replayIndex>=replayTimestamps.length-1){clearInterval(replayInterval);return;}replayIndex++;renderReplayFrame(replayIndex);},200/replaySpeed);}
+  if (replayPlaying){
+    clearInterval(replayInterval);
+    replayInterval=setInterval(()=>{
+      if(replayIndex>=replayTimestamps.length-1){clearInterval(replayInterval);return;}
+      replayIndex++; renderReplayFrame(replayIndex);
+    },200/replaySpeed);
+  }
 });
 
 document.getElementById('replay-stop-btn').addEventListener('click', ()=>{
   clearInterval(replayInterval);
   replayPlaying=false;
   document.getElementById('replay-bar').classList.remove('visible');
+  showWatermark(false);
+  showEndScreen(false);
   Object.values(liveMarkers).forEach(m=>map.removeLayer(m));
   Object.values(livePolylines).forEach(p=>map.removeLayer(p));
   liveMarkers={}; livePolylines={};
-  // Revenir au fond OSM
   map.removeLayer(LAYERS[currentLayer]);
   map.addLayer(LAYERS.osm);
   document.querySelector('input[value=osm]').checked=true;
@@ -686,6 +859,235 @@ document.getElementById('replay-stop-btn').addEventListener('click', ()=>{
   setStatus('👁 Observation','live');
   if (currentEventCode) startWatching(currentEventCode);
 });
+
+// ── Écran de fin — actions ──
+document.getElementById('end-btn-restart').addEventListener('click', ()=>{
+  showEndScreen(false);
+  replayIndex=0;
+  renderReplayFrame(0);
+});
+
+document.getElementById('end-btn-close').addEventListener('click', ()=>{
+  document.getElementById('replay-stop-btn').click();
+});
+
+document.getElementById('end-btn-export').addEventListener('click', ()=>{
+  startVideoExport();
+});
+
+// ── Export vidéo MP4 via canvas overlay ──
+async function startVideoExport() {
+  if (!replayTimestamps.length) return alert('Lance un replay d\'abord');
+
+  const mapEl = document.getElementById('map');
+  const W = mapEl.clientWidth, H = mapEl.clientHeight;
+
+  const canvas = document.getElementById('export-canvas');
+  canvas.width = W; canvas.height = H;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+
+  // Fermer l'écran de fin, rembobiner
+  showEndScreen(false);
+  replayIndex = 0;
+
+  // Arrêter le replay normal
+  clearInterval(replayInterval);
+  replayPlaying = false;
+  document.getElementById('replay-play-btn').textContent = '▶';
+
+  // MediaRecorder setup
+  let stream, recorder, chunks = [];
+  try {
+    stream = canvas.captureStream(30);
+    recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+  } catch(e) {
+    canvas.style.display = 'none';
+    return alert('Votre navigateur ne supporte pas l\'export vidéo (essayez Chrome).');
+  }
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `replay-${currentEventCode || 'convergence'}.webm`;
+    a.click();
+    URL.revokeObjectURL(url);
+    canvas.style.display = 'none';
+    ctx.clearRect(0, 0, W, H);
+    setStatus('⏪ Replay','replay');
+  };
+
+  recorder.start();
+  setStatus('⏺ Export en cours…', 'replay');
+
+  // Helper : convertit lat/lng → pixel sur la carte Leaflet
+  function latLngToPixel(lat, lng) {
+    const pt = map.latLngToContainerPoint(L.latLng(lat, lng));
+    return { x: pt.x, y: pt.y };
+  }
+
+  // Helper : dessine une bulle prénom + équipe au-dessus d'un point
+  function drawBubble(ctx, x, y, pseudo, team, color) {
+    const label = team ? `${pseudo} · ${team}` : pseudo;
+    const fontSize = 11;
+    ctx.font = `600 ${fontSize}px system-ui, sans-serif`;
+    const tw = ctx.measureText(label).width;
+    const bw = tw + 16, bh = 20;
+    const bx = x - bw/2, by = y - bh - 14;
+
+    // Bulle fond
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, 6);
+    ctx.fillStyle = 'rgba(15,23,42,0.82)';
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Texte
+    ctx.fillStyle = '#e2e8f0';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x, by + bh/2);
+
+    // Dot
+    ctx.beginPath();
+    ctx.arc(x, y - 2, 6, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // Helper : dessine les trails
+  function drawTrail(ctx, points, color) {
+    if (points.length < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i=1;i<points.length;i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.globalAlpha = 0.7;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // Helper : watermark
+  function drawWatermark(ctx, W, H) {
+    const text = '🗺️ Créé avec Convergence Map';
+    ctx.font = '600 11px system-ui, sans-serif';
+    const tw = ctx.measureText(text).width;
+    const bw = tw + 24, bh = 26;
+    const bx = (W - bw) / 2, by = H - 50;
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, 13);
+    ctx.fillStyle = 'rgba(15,23,42,0.72)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(56,189,248,0.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(226,232,240,0.8)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, W/2, by + bh/2);
+  }
+
+  // Boucle d'export frame par frame — vitesse = celle du sélecteur replay
+  const exportSpeed = replaySpeed;
+  const frameInterval = 200 / exportSpeed;
+  const totalFrames = replayTimestamps.length;
+
+  // Nombre de frames à sauter par tick selon la vitesse choisie
+  // À 1x : on avance 1 frame par tick (33ms → ~30fps)
+  // À 10x : on avance 10 frames par tick → vidéo 10x plus courte
+  const framesPerTick = Math.max(1, Math.round(exportSpeed));
+
+  const exportLoop = () => {
+    return new Promise(resolve => {
+      let idx = 0;
+      const step = () => {
+        if (idx >= totalFrames) { resolve(); return; }
+        const ts = replayTimestamps[idx];
+        ctx.clearRect(0, 0, W, H);
+
+        // Dessiner trails + markers
+        Object.entries(replayData).forEach(([pid, entries]) => {
+          const color = getColor(pid);
+          const times = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>a-b);
+          if (!times.length) return;
+
+          // Trail
+          const trailPts = times.map(t => {
+            const p = entries[t];
+            return latLngToPixel(p.lat, p.lng);
+          });
+          drawTrail(ctx, trailPts, color);
+
+          // Position courante
+          const curT = times[times.length-1];
+          const pos = entries[curT];
+          const px = latLngToPixel(pos.lat, pos.lng);
+          drawBubble(ctx, px.x, px.y, pos.pseudo||pid, pos.team||'', color);
+        });
+
+        // Watermark
+        drawWatermark(ctx, W, H);
+
+        // Timestamp
+        const elapsed = ts - replayTimestamps[0];
+        const h=Math.floor(elapsed/3600000), m=Math.floor((elapsed%3600000)/60000), s=Math.floor((elapsed%60000)/1000);
+        const timeStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        ctx.font = '500 12px system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(148,163,184,0.9)';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        ctx.fillText(timeStr, W - 16, 16);
+
+        idx += framesPerTick;
+        setTimeout(step, 33); // ~30fps canvas, vitesse via framesPerTick
+      };
+      step();
+    });
+  };
+
+  await exportLoop();
+
+  // Écran de fin dans la vidéo (2s)
+  const endFrames = 60;
+  await new Promise(resolve => {
+    let ef = 0;
+    const endStep = () => {
+      if (ef >= endFrames) { resolve(); return; }
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(10,17,32,0.92)';
+      ctx.fillRect(0, 0, W, H);
+
+      // Titre
+      ctx.font = '800 28px system-ui, sans-serif';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🏁 ' + (currentEventName || currentEventCode), W/2, H/2 - 30);
+
+      ctx.font = '500 14px system-ui, sans-serif';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText(`${Object.keys(replayData).length} participants`, W/2, H/2 + 10);
+
+      // Branding
+      ctx.font = '700 13px system-ui, sans-serif';
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('Créé avec Convergence Map', W/2, H/2 + 50);
+
+      ef++;
+      setTimeout(endStep, 33);
+    };
+    endStep();
+  });
+
+  recorder.stop();
+}
 
 </script>
 </body>
