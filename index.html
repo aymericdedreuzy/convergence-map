@@ -186,7 +186,7 @@ const LAYERS = {
   satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution:'© Esri' }),
   topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution:'© OpenTopoMap' }),
   dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution:'© CartoDB' }),
-  parchment: L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg', { attribution:'© Stadia Maps © Stamen Design' })
+  parchment: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution:'© CartoDB' })
 };
 
 const map = L.map('map', { layers: [LAYERS.osm] }).setView([46.2276, 2.2137], 6);
@@ -533,6 +533,24 @@ document.getElementById('btn-do-join').addEventListener('click', async () => {
   document.getElementById('btn-stop').style.display='inline-block';
   document.getElementById('participants-list').style.display='block';
   startWatching(code);
+  // Wake Lock — empêche l'écran de se mettre en veille
+  let wakeLock = null;
+  const requestWakeLock = async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', async () => {
+          // Relancer si la page reste visible
+          if (document.visibilityState === 'visible') await requestWakeLock();
+        });
+      }
+    } catch(e) { console.warn('Wake Lock non supporté:', e); }
+  };
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible') await requestWakeLock();
+  });
+  await requestWakeLock();
+
   const writePos=()=>{
     navigator.geolocation.getCurrentPosition(pos=>{
       set(ref(db,`positions/${code}/${myParticipantId}`),{pseudo,lat:pos.coords.latitude,lng:pos.coords.longitude,ts:Date.now()});
@@ -558,6 +576,7 @@ document.getElementById('btn-do-watch').addEventListener('click', async () => {
 
 document.getElementById('btn-stop').addEventListener('click', ()=>{
   if (trackingInterval) clearInterval(trackingInterval);
+  if (wakeLock) { wakeLock.release(); wakeLock = null; }
   if (liveUnsub) liveUnsub();
   clearMap();
   document.getElementById('btn-stop').style.display='none';
