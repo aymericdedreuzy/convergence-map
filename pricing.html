@@ -45,11 +45,11 @@ nav {
 
 /* ── HERO ── */
 .hero {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  max-width: 1100px;
+  text-align: center;
+  max-width: 720px;
   margin: 0 auto;
   padding: 96px 32px 80px;
 }
@@ -80,13 +80,13 @@ nav {
   font-size: 1rem;
   color: var(--text-2);
   font-weight: 300;
-  max-width: 420px;
+  max-width: 480px;
   margin-bottom: 36px;
   line-height: 1.7;
 }
 
-.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-.btn-primary {
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.hero-visual { margin-bottom: 40px; }
   background: var(--sky); color: #0f172a;
   padding: 12px 26px; border-radius: 10px;
   font-size: 0.88rem; font-weight: 700;
@@ -111,122 +111,12 @@ nav {
   border-radius: 20px; padding: 3px 11px;
 }
 
-/* ── MOCKUP SVG ── */
-.hero-visual {
-  position: relative;
-  display: flex; justify-content: center; align-items: center;
+/* ── CANVAS HERO ── */
+#convergence-canvas {
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 0 30px rgba(56,189,248,0.15));
 }
-.mockup-frame {
-  width: 100%; max-width: 480px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(56,189,248,0.08);
-}
-.mockup-topbar {
-  background: #1e293b;
-  border-bottom: 1px solid var(--border);
-  padding: 8px 12px;
-  display: flex; align-items: center; gap: 8px;
-}
-.mockup-dot { width:9px; height:9px; border-radius:50%; }
-.mockup-title { font-size: 0.72rem; color: var(--sky); font-weight: 700; margin-left: 4px; }
-.mockup-badge { font-size: 0.62rem; padding: 2px 8px; border-radius: 10px; background: #14532d; color: #4ade80; margin-left: auto; }
-
-.mockup-map {
-  position: relative;
-  height: 280px;
-  background: #1a2744;
-  overflow: hidden;
-}
-
-/* Grille de carte stylisée */
-.map-grid {
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(56,189,248,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(56,189,248,0.04) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
-/* Routes simulées */
-.map-route {
-  position: absolute;
-  background: none;
-}
-
-/* Participants animés */
-.map-participant {
-  position: absolute;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-}
-.map-bubble {
-  background: rgba(15,23,42,0.88);
-  border-radius: 8px;
-  padding: 2px 8px;
-  font-size: 9px; font-weight: 600; color: var(--text);
-  border: 1px solid;
-  white-space: nowrap;
-}
-.map-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 0 6px rgba(0,0,0,0.5);
-}
-
-/* Animations de déplacement */
-@keyframes move-a {
-  0%   { transform: translate(60px, 140px); }
-  25%  { transform: translate(110px, 110px); }
-  50%  { transform: translate(160px, 90px); }
-  75%  { transform: translate(200px, 120px); }
-  100% { transform: translate(60px, 140px); }
-}
-@keyframes move-b {
-  0%   { transform: translate(80px, 160px); }
-  30%  { transform: translate(130px, 130px); }
-  60%  { transform: translate(170px, 110px); }
-  100% { transform: translate(80px, 160px); }
-}
-@keyframes move-c {
-  0%   { transform: translate(50px, 120px); }
-  40%  { transform: translate(90px, 95px); }
-  70%  { transform: translate(150px, 75px); }
-  100% { transform: translate(50px, 120px); }
-}
-
-.p-a { animation: move-a 8s ease-in-out infinite; }
-.p-b { animation: move-b 10s ease-in-out infinite; }
-.p-c { animation: move-c 12s ease-in-out infinite; }
-
-/* Trail SVG animé */
-.map-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.trail-line { fill: none; stroke-width: 2; opacity: 0.6; stroke-dasharray: 200; animation: dash 3s linear infinite; }
-@keyframes dash { to { stroke-dashoffset: -400; } }
-
-/* Marker départ/arrivée */
-.map-pin {
-  position: absolute;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
-  border: 2px solid white;
-  box-shadow: 0 0 8px rgba(0,0,0,0.4);
-}
-
-/* Panel participants */
-.mockup-panel {
-  padding: 10px 14px;
-  border-top: 1px solid var(--border);
-  display: flex; gap: 8px; flex-wrap: wrap;
-}
-.pchip {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 0.68rem; color: var(--text-2);
-}
-.pchip-dot { width: 7px; height: 7px; border-radius: 50%; }
 
 /* ── SECTION COMMUNE ── */
 section { padding: 80px 32px; }
@@ -407,72 +297,19 @@ footer nav a:hover { color: var(--text); }
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-content">
-    <div class="hero-eyebrow">Suivi GPS temps réel</div>
-    <h1>Suivez chaque pas,<br><em>ensemble.</em></h1>
-    <p class="hero-sub">
-      Convergence Map permet à vos groupes de se voir en direct sur une carte partagée — pèlerinages, trails, séminaires itinérants. Sans app à installer.
-    </p>
-    <div class="hero-actions">
-      <a href="app.html" class="btn-primary">🚀 Commencer gratuitement</a>
-      <a href="#pricing" class="btn-secondary">Voir les tarifs</a>
-    </div>
-    <div class="hero-tags">
-      <span class="hero-tag">✓ Aucune installation</span>
-      <span class="hero-tag">✓ Lien de partage instantané</span>
-      <span class="hero-tag">✓ Fonctionne hors réseau limité</span>
-    </div>
+  <!-- Canvas animation (même que index.html) -->
+  <div class="hero-visual">
+    <canvas id="convergence-canvas" width="300" height="170"></canvas>
   </div>
 
-  <!-- MOCKUP -->
-  <div class="hero-visual">
-    <div class="mockup-frame">
-      <div class="mockup-topbar">
-        <div class="mockup-dot" style="background:#ef4444"></div>
-        <div class="mockup-dot" style="background:#f59e0b"></div>
-        <div class="mockup-dot" style="background:#22c55e"></div>
-        <span class="mockup-title">🗺️ Convergence Map</span>
-        <span class="mockup-badge">● Live</span>
-      </div>
-      <div class="mockup-map">
-        <div class="map-grid"></div>
-
-        <!-- Routes SVG -->
-        <svg class="map-svg" viewBox="0 0 480 280" preserveAspectRatio="none">
-          <path class="trail-line" d="M 60,200 Q 110,160 160,130 T 260,160" stroke="#ef4444"/>
-          <path class="trail-line" d="M 80,210 Q 130,175 180,145 T 260,160" stroke="#3b82f6" style="animation-delay:-1s"/>
-          <path class="trail-line" d="M 50,185 Q 90,145 150,110 T 260,160" stroke="#22c55e" style="animation-delay:-2s"/>
-          <!-- Route principale -->
-          <path d="M 40,220 Q 120,170 200,130 Q 280,90 360,100" stroke="rgba(255,255,255,0.06)" stroke-width="8" fill="none"/>
-          <path d="M 40,220 Q 120,170 200,130 Q 280,90 360,100" stroke="rgba(255,255,255,0.12)" stroke-width="2" fill="none"/>
-        </svg>
-
-        <!-- Pin départ -->
-        <div class="map-pin" style="background:#22c55e;left:30px;top:190px;font-size:9px">🟢</div>
-        <!-- Pin arrivée -->
-        <div class="map-pin" style="background:#ef4444;left:340px;top:72px;font-size:9px">🔴</div>
-
-        <!-- Participants animés -->
-        <div class="map-participant p-a" style="position:absolute;top:0;left:0">
-          <div class="map-bubble" style="border-color:#ef4444;color:#fca5a5">Marie · Rouge</div>
-          <div class="map-dot" style="background:#ef4444"></div>
-        </div>
-        <div class="map-participant p-b" style="position:absolute;top:0;left:0">
-          <div class="map-bubble" style="border-color:#3b82f6;color:#93c5fd">Thomas · Bleu</div>
-          <div class="map-dot" style="background:#3b82f6"></div>
-        </div>
-        <div class="map-participant p-c" style="position:absolute;top:0;left:0">
-          <div class="map-bubble" style="border-color:#22c55e;color:#86efac">Lucie</div>
-          <div class="map-dot" style="background:#22c55e"></div>
-        </div>
-      </div>
-      <div class="mockup-panel">
-        <span class="pchip"><span class="pchip-dot" style="background:#ef4444"></span>Marie</span>
-        <span class="pchip"><span class="pchip-dot" style="background:#3b82f6"></span>Thomas</span>
-        <span class="pchip"><span class="pchip-dot" style="background:#22c55e"></span>Lucie</span>
-        <span style="margin-left:auto;font-size:0.65rem;color:var(--muted)">3 participants · Live</span>
-      </div>
-    </div>
+  <div class="hero-eyebrow">Suivi GPS temps réel</div>
+  <h1>Suivez chaque pas,<br><em>ensemble.</em></h1>
+  <p class="hero-sub">
+    Convergence Map permet à vos groupes de se voir en direct sur une carte partagée — pèlerinages, trails, séminaires itinérants. Sans app à installer.
+  </p>
+  <div class="hero-actions">
+    <a href="app.html" class="btn-primary">🚀 Commencer gratuitement</a>
+    <a href="#pricing" class="btn-secondary">Voir les tarifs</a>
   </div>
 </div>
 
@@ -761,6 +598,99 @@ document.querySelectorAll('.usecase-card, .feature-item, .pricing-card').forEach
   el.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
   observer.observe(el);
 });
+</script>
+<script>
+// ── Animation convergence (identique à index.html) ──
+(function() {
+  const canvas = document.getElementById('convergence-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const CX = W / 2, CY = H / 2;
+
+  const COLORS = ['#ef4444','#3b82f6','#22c55e','#f97316','#a855f7','#eab308','#06b6d4','#ec4899'];
+
+  const dots = Array.from({ length: 8 }, (_, i) => {
+    const angle = (i / 8) * Math.PI * 2 + Math.random() * 0.3;
+    const r = 65 + Math.random() * 20;
+    return {
+      startX: CX + Math.cos(angle) * r,
+      startY: CY + Math.sin(angle) * r,
+      color: COLORS[i],
+      t: Math.random(),
+      speed: 0.003 + Math.random() * 0.002,
+      trail: []
+    };
+  });
+
+  function easeInOut(t) {
+    return t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    const grd = ctx.createRadialGradient(CX, CY, 0, CX, CY, 22);
+    grd.addColorStop(0, 'rgba(56,189,248,0.25)');
+    grd.addColorStop(1, 'rgba(56,189,248,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(CX, CY, 22, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(CX, CY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fill();
+
+    dots.forEach(dot => {
+      dot.t += dot.speed;
+      if (dot.t > 1) dot.t = 0;
+
+      const progress = easeInOut(dot.t);
+      const x = dot.startX + (CX - dot.startX) * progress;
+      const y = dot.startY + (CY - dot.startY) * progress;
+
+      dot.trail.push({ x, y });
+      if (dot.trail.length > 24) dot.trail.shift();
+
+      dot.trail.forEach((pt, i) => {
+        const alpha = (i / dot.trail.length) * (1 - progress) * 0.5;
+        ctx.globalAlpha = alpha;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = dot.color;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+
+      ctx.beginPath();
+      ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = dot.color;
+      ctx.shadowColor = dot.color;
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    draw();
+  } else {
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.arc(CX, CY, 6, 0, Math.PI * 2);
+    ctx.fill();
+    COLORS.forEach((c, i) => {
+      const angle = (i / COLORS.length) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.arc(CX + Math.cos(angle)*60, CY + Math.sin(angle)*60, 4, 0, Math.PI * 2);
+      ctx.fillStyle = c;
+      ctx.fill();
+    });
+  }
+})();
 </script>
 </body>
 </html>
