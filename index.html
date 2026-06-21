@@ -93,7 +93,6 @@ nav {
   position: relative;
 }
 
-/* Subtle radial glow behind canvas */
 #hero::before {
   content: '';
   position: absolute;
@@ -342,6 +341,7 @@ footer a:hover { text-decoration: underline; }
   <a href="/" class="nav-logo">🗺️ Convergence Map</a>
   <div class="nav-links">
     <a href="#features" class="btn-nav btn-nav-ghost">Fonctionnalités</a>
+    <a href="pricing.html" class="btn-nav btn-nav-ghost">Tarifs</a>
     <a href="dashboard.html" class="btn-nav btn-nav-sky">Espace organisateur</a>
   </div>
 </nav>
@@ -349,7 +349,6 @@ footer a:hover { text-decoration: underline; }
 <!-- Hero -->
 <section id="hero">
 
-  <!-- Animated convergence graphic -->
   <canvas id="convergence-canvas" width="280" height="160"></canvas>
 
   <p class="hero-eyebrow">Tracking GPS collaboratif · Temps réel</p>
@@ -363,10 +362,8 @@ footer a:hover { text-decoration: underline; }
     Partagez votre position depuis n'importe quel smartphone. Observez la progression du groupe sur une carte live. Revivez le trajet en replay accéléré.
   </p>
 
-  <!-- Dual CTA -->
   <div class="cta-block">
 
-    <!-- Participant card with join form -->
     <div class="cta-card primary">
       <div class="cta-icon">📍</div>
       <div class="cta-label">Participant</div>
@@ -378,7 +375,6 @@ footer a:hover { text-decoration: underline; }
       </div>
     </div>
 
-    <!-- Organiser card -->
     <a href="dashboard.html" class="cta-card secondary">
       <div class="cta-icon">🎛️</div>
       <div class="cta-label">Organisateur</div>
@@ -388,6 +384,12 @@ footer a:hover { text-decoration: underline; }
     </a>
 
   </div>
+
+  <!-- Lien pricing discret sous les CTA -->
+  <p style="margin-top:28px;font-size:0.75rem;color:var(--subtle)">
+    Gratuit pour commencer · <a href="pricing.html" style="color:var(--sky);text-decoration:none;font-weight:600">Voir les tarifs →</a>
+  </p>
+
 </section>
 
 <!-- Features -->
@@ -445,123 +447,66 @@ footer a:hover { text-decoration: underline; }
 </section>
 
 <footer>
-  <p>Convergence Map by Dreuzy Père et Fils · <a href="dashboard.html">Espace organisateur</a> · <a href="app.html">Carte</a></p>
+  <p>Convergence Map · <a href="pricing.html">Tarifs</a> · <a href="dashboard.html">Espace organisateur</a> · <a href="app.html">Carte</a></p>
 </footer>
 
 <script>
-// ── Join redirect ──
 document.getElementById('btn-go').addEventListener('click', () => {
   const code = document.getElementById('code-input').value.trim().toUpperCase();
-  if (!code) {
-    document.getElementById('code-input').focus();
-    return;
-  }
+  if (!code) { document.getElementById('code-input').focus(); return; }
   window.location.href = `app.html?code=${code}`;
 });
 document.getElementById('code-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('btn-go').click();
 });
 
-// ── Convergence animation ──
 (function() {
   const canvas = document.getElementById('convergence-canvas');
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   const CX = W / 2, CY = H / 2;
-
   const COLORS = ['#ef4444','#3b82f6','#22c55e','#f97316','#a855f7','#eab308','#06b6d4','#ec4899'];
-
-  // Fixed set of dots converging toward center
   const dots = Array.from({ length: 8 }, (_, i) => {
     const angle = (i / 8) * Math.PI * 2 + Math.random() * 0.3;
     const r = 65 + Math.random() * 20;
-    return {
-      startX: CX + Math.cos(angle) * r,
-      startY: CY + Math.sin(angle) * r,
-      color: COLORS[i],
-      t: Math.random(),           // phase offset
-      speed: 0.003 + Math.random() * 0.002,
-      trail: []
-    };
+    return { startX: CX + Math.cos(angle) * r, startY: CY + Math.sin(angle) * r, color: COLORS[i], t: Math.random(), speed: 0.003 + Math.random() * 0.002, trail: [] };
   });
-
-  function easeInOut(t) {
-    return t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
-  }
-
-  let frame = 0;
-
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
   function draw() {
     ctx.clearRect(0, 0, W, H);
-
-    // Center target glow
     const grd = ctx.createRadialGradient(CX, CY, 0, CX, CY, 22);
     grd.addColorStop(0, 'rgba(56,189,248,0.25)');
     grd.addColorStop(1, 'rgba(56,189,248,0)');
     ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.arc(CX, CY, 22, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Center dot
-    ctx.beginPath();
-    ctx.arc(CX, CY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = '#38bdf8';
-    ctx.fill();
-
+    ctx.beginPath(); ctx.arc(CX, CY, 22, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(CX, CY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#38bdf8'; ctx.fill();
     dots.forEach(dot => {
       dot.t += dot.speed;
       if (dot.t > 1) dot.t = 0;
-
       const progress = easeInOut(dot.t);
       const x = dot.startX + (CX - dot.startX) * progress;
       const y = dot.startY + (CY - dot.startY) * progress;
-
-      // Trail
-      dot.trail.push({ x, y, a: 1 - progress });
+      dot.trail.push({ x, y });
       if (dot.trail.length > 24) dot.trail.shift();
-
       dot.trail.forEach((pt, i) => {
-        const alpha = (i / dot.trail.length) * (1 - progress) * 0.5;
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = dot.color.replace(')', `,${alpha})`).replace('rgb', 'rgba').replace('#', 'rgba(').replace('rgba(', '#') ;
-        // simpler:
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = dot.color;
-        ctx.fill();
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = (i / dot.trail.length) * (1 - progress) * 0.5;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = dot.color; ctx.fill(); ctx.globalAlpha = 1;
       });
-
-      // Dot
-      ctx.beginPath();
-      ctx.arc(x, y, 4.5, 0, Math.PI * 2);
-      ctx.fillStyle = dot.color;
-      ctx.shadowColor = dot.color;
-      ctx.shadowBlur = 8;
-      ctx.fill();
-      ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = dot.color; ctx.shadowColor = dot.color; ctx.shadowBlur = 8;
+      ctx.fill(); ctx.shadowBlur = 0;
     });
-
-    frame++;
     requestAnimationFrame(draw);
   }
-
-  // Respect prefers-reduced-motion
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    draw();
-  } else {
-    // Static fallback
-    ctx.fillStyle = '#38bdf8';
-    ctx.beginPath();
-    ctx.arc(CX, CY, 6, 0, Math.PI * 2);
-    ctx.fill();
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) { draw(); }
+  else {
+    ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(CX, CY, 6, 0, Math.PI * 2); ctx.fill();
     COLORS.forEach((c, i) => {
       const angle = (i / COLORS.length) * Math.PI * 2;
-      ctx.beginPath();
-      ctx.arc(CX + Math.cos(angle)*60, CY + Math.sin(angle)*60, 4, 0, Math.PI * 2);
-      ctx.fillStyle = c;
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(CX + Math.cos(angle)*60, CY + Math.sin(angle)*60, 4, 0, Math.PI * 2);
+      ctx.fillStyle = c; ctx.fill();
     });
   }
 })();
