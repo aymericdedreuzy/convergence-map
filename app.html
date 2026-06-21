@@ -278,6 +278,7 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, push, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getLicence, PLANS, renderPlanBadge } from './licence-check.js';
 
 // Licence active pour l'événement en cours — mise à jour à chaque join/watch
@@ -295,6 +296,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
+
+// Utilisateur connecté (optionnel — pour ownerUid)
+let currentUser = null;
+onAuthStateChanged(auth, user => { currentUser = user; });
 
 // ── Tile layers ──
 const LAYERS = {
@@ -659,6 +665,7 @@ document.getElementById('btn-do-create').addEventListener('click', async () => {
   const existing = await get(ref(db,`events/${code}`));
   if (existing.exists()) return alert(`Le code "${code}" est déjà utilisé.`);
   const eventData = { name, code, createdAt:Date.now(), endsAt:Date.now()+duration*3600000, active:true };
+  if (currentUser) eventData.ownerUid = currentUser.uid;
   const sLat=parseFloat(document.getElementById('start-lat').value);
   const sLng=parseFloat(document.getElementById('start-lng').value);
   const sLabel=document.getElementById('start-label').value.trim();
