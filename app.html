@@ -278,6 +278,10 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, push, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getLicence, PLANS, renderPlanBadge } from './licence-check.js';
+
+// Licence active pour l'événement en cours — mise à jour à chaque join/watch
+let currentLicence = { plan:'freemium', limits:PLANS.freemium, source:'default', expired:false };
 
 const firebaseConfig = {
   apiKey: "AIzaSyBAU9uBrrbbMbW2mvNobcxvbss1AgrhmIk",
@@ -685,6 +689,28 @@ document.getElementById('btn-do-join').addEventListener('click', async () => {
   if (!code||!pseudo) return alert('Remplis tous les champs');
   const snap=await get(ref(db,`events/${code}`));
   if (!snap.exists()) return alert('Événement introuvable');
+
+  // ── Vérification licence ──
+  currentLicence = await getLicence(db, { code });
+  const limits = currentLicence.limits;
+
+  // Vérifier le nombre de participants actuels vs limite du plan
+  if (limits.maxParticipants < Infinity) {
+    const posSnap = await get(ref(db, `positions/${code}`));
+    const currentCount = posSnap.exists() ? Object.keys(posSnap.val()).length : 0;
+    if (currentCount >= limits.maxParticipants) {
+      return alert(`⚠️ Cet événement est limité à ${limits.maxParticipants} participants (plan ${currentLicence.plan}).\n\nL'organisateur doit passer au plan supérieur pour accueillir plus de participants.`);
+    }
+  }
+
+  // Afficher le badge plan dans la topbar
+  const existingBadge = document.getElementById('plan-badge');
+  if (existingBadge) existingBadge.remove();
+  const badge = document.createElement('span');
+  badge.id = 'plan-badge';
+  badge.innerHTML = renderPlanBadge(currentLicence.plan);
+  document.getElementById('topbar').appendChild(badge);
+
   currentEventCode=code;
   const storageKey = `participant_${code}`;
   myParticipantId = localStorage.getItem(storageKey);
@@ -732,6 +758,15 @@ document.getElementById('btn-do-watch').addEventListener('click', async () => {
   const snap=await get(ref(db,`events/${code}`));
   if (!snap.exists()) return alert('Événement introuvable');
   currentEventCode=code;
+
+  // ── Vérification licence ──
+  currentLicence = await getLicence(db, { code });
+  const existingBadge = document.getElementById('plan-badge');
+  if (existingBadge) existingBadge.remove();
+  const badge = document.createElement('span');
+  badge.id = 'plan-badge';
+  badge.innerHTML = renderPlanBadge(currentLicence.plan);
+  document.getElementById('topbar').appendChild(badge);
   setStatus(`👁 Observation — ${code}`,'live');
   closePanel();
   document.getElementById('participants-list').style.display='block';
@@ -805,7 +840,8 @@ document.getElementById('btn-replay').addEventListener('click', async ()=>{
   document.getElementById('replay-bar').classList.add('visible');
   document.getElementById('replay-slider').max=replayTimestamps.length-1;
   replayIndex=0; replayPlaying=false;
-  showWatermark(true);
+  // Watermark visible uniquement en freemium
+  showWatermark(currentLicence.limits.branding);
   showEndScreen(false);
   renderReplayFrame(0);
   setStatus('⏪ Replay prêt','replay');
@@ -872,6 +908,16 @@ document.getElementById('end-btn-close').addEventListener('click', ()=>{
 });
 
 document.getElementById('end-btn-export').addEventListener('click', ()=>{
+  if (!currentLicence.limits.exportVideo) {
+    return alert(`⬆️ Export vidéo disponible à partir du plan Standard (15 €/événement).\n\nContactez-nous pour obtenir une licence : contact@convergence-map.app`);
+  }
+  startVideoExport();
+});
+
+document.getElementById('btn-record').addEventListener('click', ()=>{
+  if (!currentLicence.limits.exportVideo) {
+    return alert(`⬆️ Export vidéo disponible à partir du plan Standard (15 €/événement).\n\nContactez-nous : contact@convergence-map.app`);
+  }
   startVideoExport();
 });
 
@@ -1061,6 +1107,9 @@ async function startVideoExport() {
     ctx.fillText(text, W/2, by + bh/2);
   }
 
+  // Watermark — forcé en freemium, optionnel sinon
+  const showWatermarkInVideo = currentLicence.limits.branding;
+
   // Boucle d'export frame par frame — vitesse = celle du sélecteur replay
   const exportSpeed = replaySpeed;
   const frameInterval = 200 / exportSpeed;
@@ -1102,8 +1151,8 @@ async function startVideoExport() {
           drawBubble(ctx, px.x, px.y, pos.pseudo||pid, pos.team||'', color);
         });
 
-        // Watermark
-        drawWatermark(ctx, W, H);
+        // Watermark — forcé en freemium
+        if (showWatermarkInVideo) drawWatermark(ctx, W, H);
 
         // Timestamp — date et heure réelles
         const realDate = new Date(ts);
