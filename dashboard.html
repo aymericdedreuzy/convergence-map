@@ -8,7 +8,6 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-height:100vh; display:flex; flex-direction:column; }
 
-/* ── Topbar ── */
 #topbar { background:#1e293b; padding:8px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; border-bottom:1px solid #334155; z-index:100; }
 #topbar h1 { font-size:1rem; font-weight:700; color:#38bdf8; white-space:nowrap; }
 #topbar-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
@@ -29,7 +28,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 .btn-sm { padding:4px 9px; font-size:0.72rem; }
 .btn-icon { padding:5px 8px; font-size:0.8rem; }
 
-/* ── Auth screen ── */
 #auth-screen { flex:1; display:flex; align-items:center; justify-content:center; }
 .auth-card { background:#1e293b; border:1px solid #334155; border-radius:16px; padding:40px 36px; text-align:center; max-width:380px; width:100%; box-shadow:0 8px 40px rgba(0,0,0,0.4); }
 .auth-card .logo { font-size:2.4rem; margin-bottom:12px; }
@@ -37,26 +35,21 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 .auth-card p { font-size:0.82rem; color:#64748b; margin-bottom:28px; line-height:1.6; }
 .btn-google { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:11px 20px; background:white; color:#1e293b; border:none; border-radius:8px; font-size:0.9rem; font-weight:600; cursor:pointer; transition:opacity 0.2s; }
 .btn-google:hover { opacity:0.9; }
-.btn-google svg { flex-shrink:0; }
+.auth-loading { font-size:0.82rem; color:#64748b; margin-top:14px; display:none; }
 
-/* ── Main layout ── */
 #main { flex:1; display:none; }
 #main.visible { display:flex; flex-direction:column; }
 
-/* ── Content ── */
 #content { flex:1; padding:24px 20px; max-width:960px; width:100%; margin:0 auto; }
 
-/* ── Stats strip ── */
 .stats-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:24px; }
 .stat-card { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:14px 16px; }
 .stat-card .stat-val { font-size:1.6rem; font-weight:700; color:#38bdf8; line-height:1; }
 .stat-card .stat-label { font-size:0.72rem; color:#64748b; margin-top:4px; }
 
-/* ── Section header ── */
 .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .section-header h2 { font-size:0.82rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; }
 
-/* ── Event cards ── */
 #events-grid { display:flex; flex-direction:column; gap:10px; }
 .event-card { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:16px; display:flex; align-items:center; gap:14px; transition:border-color 0.2s; }
 .event-card:hover { border-color:#38bdf8; }
@@ -76,12 +69,10 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 .pill.archived { background:#292524; color:#78716c; }
 .event-actions { display:flex; gap:6px; flex-wrap:wrap; flex-shrink:0; }
 
-/* ── Empty state ── */
 .empty-state { text-align:center; padding:48px 20px; color:#475569; }
 .empty-state .empty-icon { font-size:2.5rem; margin-bottom:12px; }
 .empty-state p { font-size:0.82rem; line-height:1.7; }
 
-/* ── Modal overlay ── */
 #modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500; display:none; align-items:center; justify-content:center; padding:20px; }
 #modal-overlay.open { display:flex; }
 .modal { background:#1e293b; border:1px solid #334155; border-radius:14px; padding:24px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
@@ -93,10 +84,7 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 .coord-row { display:flex; gap:6px; }
 .coord-row input { flex:1; }
 .modal-footer { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
-.wp-row { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
-.wp-row input { flex:1; margin-bottom:0; }
 
-/* ── Stats modal ── */
 .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
 .stat-box { background:#0f172a; border:1px solid #334155; border-radius:8px; padding:12px; }
 .stat-box .val { font-size:1.3rem; font-weight:700; color:#38bdf8; }
@@ -106,16 +94,13 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 .participant-table td { padding:7px 8px; border-bottom:1px solid #1e293b; }
 .participant-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
 
-/* ── Toast ── */
 #toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1e293b; border:1px solid #334155; border-radius:8px; padding:10px 20px; font-size:0.82rem; color:#e2e8f0; z-index:9999; display:none; box-shadow:0 4px 20px rgba(0,0,0,0.4); white-space:nowrap; }
 #toast.show { display:block; }
 #toast.success { border-color:#22c55e; color:#4ade80; }
 #toast.error { border-color:#ef4444; color:#f87171; }
 
-/* ── Loader ── */
 .loader { text-align:center; padding:32px; color:#475569; font-size:0.82rem; }
 
-/* ── Confirm modal ── */
 #confirm-modal { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:600; display:none; align-items:center; justify-content:center; padding:20px; }
 #confirm-modal.open { display:flex; }
 .confirm-box { background:#1e293b; border:1px solid #334155; border-radius:12px; padding:24px; max-width:360px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
@@ -125,7 +110,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 </head>
 <body>
 
-<!-- Topbar -->
 <div id="topbar">
   <h1>🗺️ Convergence Map</h1>
   <div id="topbar-right" style="display:none">
@@ -138,7 +122,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
   </div>
 </div>
 
-<!-- Auth screen -->
 <div id="auth-screen">
   <div class="auth-card">
     <div class="logo">🗺️</div>
@@ -148,42 +131,35 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
       <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
       Continuer avec Google
     </button>
+    <div class="auth-loading" id="auth-loading">Connexion en cours…</div>
   </div>
 </div>
 
-<!-- Main dashboard -->
 <div id="main">
   <div id="content">
-
-    <!-- Stats strip -->
     <div class="stats-strip" id="stats-strip">
       <div class="stat-card"><div class="stat-val" id="stat-total">—</div><div class="stat-label">Événements créés</div></div>
       <div class="stat-card"><div class="stat-val" id="stat-active">—</div><div class="stat-label">En cours</div></div>
       <div class="stat-card"><div class="stat-val" id="stat-participants">—</div><div class="stat-label">Participants (total)</div></div>
     </div>
-
-    <!-- Events list -->
     <div class="section-header">
       <h2>Mes événements</h2>
       <button class="btn btn-green btn-sm" id="btn-new-event">+ Créer un événement</button>
     </div>
     <div id="events-grid"><div class="loader">Chargement…</div></div>
-
   </div>
 </div>
 
-<!-- Create/Edit modal -->
+<!-- Create modal -->
 <div id="modal-overlay">
   <div class="modal">
     <h2 id="modal-title">Créer un événement</h2>
-
     <label>Nom de l'événement</label>
     <input id="f-name" placeholder="ex: Pèlerinage Lourdes 2025"/>
     <label>Code d'accès <span style="color:#64748b;font-size:0.72rem">(majuscules, sans espace)</span></label>
     <input id="f-code" placeholder="ex: PELE2025" style="text-transform:uppercase"/>
     <label>Durée (heures)</label>
     <input id="f-duration" type="number" value="8" min="1" max="72"/>
-
     <div class="section-title">Départ (facultatif)</div>
     <label>Nom du lieu</label>
     <input id="f-start-label" placeholder="ex: Cathédrale de Tours"/>
@@ -191,7 +167,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
       <input id="f-start-lat" placeholder="Latitude"/>
       <input id="f-start-lng" placeholder="Longitude"/>
     </div>
-
     <div class="section-title">Arrivée (facultatif)</div>
     <label>Nom du lieu</label>
     <input id="f-end-label" placeholder="ex: Sanctuaire de Lourdes"/>
@@ -199,11 +174,9 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
       <input id="f-end-lat" placeholder="Latitude"/>
       <input id="f-end-lng" placeholder="Longitude"/>
     </div>
-
     <div class="section-title">Étapes (max 5, facultatif)</div>
     <div id="f-waypoints"></div>
     <button class="btn btn-gray btn-sm" id="f-btn-add-wp" style="margin-bottom:10px">+ Ajouter une étape</button>
-
     <div class="modal-footer">
       <button class="btn btn-ghost" id="modal-cancel">Annuler</button>
       <button class="btn btn-green" id="modal-save">Créer</button>
@@ -233,13 +206,12 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, get, remove, update, onValue, off } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBAU9uBrrbbMbW2mvNobcxvbss1AgrhmIk",
@@ -261,35 +233,41 @@ const COLORS = ['#ef4444','#3b82f6','#22c55e','#f97316','#a855f7','#eab308','#06
 // ── Toast ──
 function toast(msg, type='') {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show ' + type;
+  el.textContent = msg; el.className = 'show ' + type;
   clearTimeout(el._t);
   el._t = setTimeout(() => el.className = '', 3000);
 }
 
 // ── Confirm ──
-function confirm(text) {
+function confirmDialog(text) {
   return new Promise(resolve => {
     document.getElementById('confirm-text').textContent = text;
     document.getElementById('confirm-modal').classList.add('open');
-    const ok = document.getElementById('confirm-ok');
-    const cancel = document.getElementById('confirm-cancel');
-    const cleanup = () => { document.getElementById('confirm-modal').classList.remove('open'); };
-    ok.onclick = () => { cleanup(); resolve(true); };
-    cancel.onclick = () => { cleanup(); resolve(false); };
+    const cleanup = () => document.getElementById('confirm-modal').classList.remove('open');
+    document.getElementById('confirm-ok').onclick = () => { cleanup(); resolve(true); };
+    document.getElementById('confirm-cancel').onclick = () => { cleanup(); resolve(false); };
   });
 }
 
-// ── Auth ──
+// ── Auth — signInWithRedirect (compatible GitHub Pages / COOP) ──
 let currentUser = null;
 let eventsUnsub = null;
 
-document.getElementById('btn-google-login').addEventListener('click', async () => {
-  try {
-    await signInWithPopup(auth, provider);
-  } catch(e) {
-    toast('Connexion échouée : ' + e.message, 'error');
+// Récupérer le résultat du redirect Google au retour
+getRedirectResult(auth).then(result => {
+  if (result?.user) {
+    // Connexion réussie via redirect — onAuthStateChanged prendra le relais
   }
+}).catch(e => {
+  toast('Erreur de connexion : ' + e.message, 'error');
+  document.getElementById('auth-loading').style.display = 'none';
+});
+
+document.getElementById('btn-google-login').addEventListener('click', async () => {
+  document.getElementById('auth-loading').style.display = 'block';
+  document.getElementById('btn-google-login').style.display = 'none';
+  await signInWithRedirect(auth, provider);
+  // La page se recharge automatiquement au retour
 });
 
 document.getElementById('btn-logout').addEventListener('click', async () => {
@@ -307,8 +285,8 @@ onAuthStateChanged(auth, user => {
     document.getElementById('user-initial').textContent = initial;
     document.getElementById('user-name').textContent = user.displayName || user.email;
     if (user.photoURL) {
-      const av = document.getElementById('user-initial');
-      av.outerHTML = `<img class="user-avatar" id="user-initial" src="${user.photoURL}" alt="${initial}"/>`;
+      document.getElementById('user-initial').outerHTML =
+        `<img class="user-avatar" id="user-initial" src="${user.photoURL}" alt="${initial}"/>`;
     }
     loadEvents(user.uid);
   } else {
@@ -320,14 +298,8 @@ onAuthStateChanged(auth, user => {
 });
 
 // ── Load events ──
-function formatDate(ts) {
-  return new Date(ts).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
-}
-
-function formatTime(ts) {
-  return new Date(ts).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
-}
-
+function formatDate(ts) { return new Date(ts).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }); }
+function formatTime(ts) { return new Date(ts).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }); }
 function eventStatus(ev) {
   if (ev.archived) return 'archived';
   if (!ev.active || Date.now() > ev.endsAt) return 'ended';
@@ -336,25 +308,18 @@ function eventStatus(ev) {
 
 async function loadEvents(uid) {
   const evRef = ref(db, 'events');
-
   if (eventsUnsub) off(evRef);
-
   onValue(evRef, async snap => {
     const all = snap.val() || {};
     const mine = Object.entries(all).filter(([, ev]) => ev.ownerUid === uid);
-
-    // Stats
     document.getElementById('stat-total').textContent = mine.length;
     document.getElementById('stat-active').textContent = mine.filter(([, ev]) => eventStatus(ev) === 'active').length;
-
-    // Count participants across all events
     let totalParticipants = 0;
     for (const [code] of mine) {
       const posSnap = await get(ref(db, `positions/${code}`));
       if (posSnap.exists()) totalParticipants += Object.keys(posSnap.val()).length;
     }
     document.getElementById('stat-participants').textContent = totalParticipants;
-
     renderEvents(mine);
   });
 }
@@ -362,193 +327,138 @@ async function loadEvents(uid) {
 function renderEvents(entries) {
   const grid = document.getElementById('events-grid');
   if (!entries.length) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🗺️</div>
-        <p>Aucun événement pour l'instant.<br>Crée ton premier événement pour commencer.</p>
-      </div>`;
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🗺️</div><p>Aucun événement pour l'instant.<br>Crée ton premier événement pour commencer.</p></div>`;
     return;
   }
-
-  // Sort: active first, then ended, then archived; then by createdAt desc
-  const order = { active: 0, ended: 1, archived: 2 };
+  const order = { active:0, ended:1, archived:2 };
   entries.sort(([,a],[,b]) => {
     const sa = order[eventStatus(a)], sb = order[eventStatus(b)];
     if (sa !== sb) return sa - sb;
-    return (b.createdAt || 0) - (a.createdAt || 0);
+    return (b.createdAt||0) - (a.createdAt||0);
   });
-
+  const icons = { active:'🟢', ended:'🔵', archived:'⬛' };
+  const pillLabels = { active:'En cours', ended:'Terminé', archived:'Archivé' };
   grid.innerHTML = entries.map(([code, ev]) => {
     const status = eventStatus(ev);
-    const icons = { active: '🟢', ended: '🔵', archived: '⬛' };
-    const pillLabels = { active: 'En cours', ended: 'Terminé', archived: 'Archivé' };
-    const ends = ev.endsAt ? `Se termine le ${formatDate(ev.endsAt)} à ${formatTime(ev.endsAt)}` : '';
     const created = ev.createdAt ? `Créé le ${formatDate(ev.createdAt)}` : '';
-
+    const ends = ev.endsAt && status === 'active' ? `Se termine le ${formatDate(ev.endsAt)} à ${formatTime(ev.endsAt)}` : '';
     return `<div class="event-card ${status}" data-code="${code}">
       <div class="event-badge ${status}">${icons[status]}</div>
       <div class="event-info">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span class="event-name">${ev.name || code}</span>
+          <span class="event-name">${ev.name||code}</span>
           <span class="pill ${status}">${pillLabels[status]}</span>
         </div>
         <div class="event-meta">
           <span class="event-code">${code}</span>
-          ${created ? `<span>${created}</span>` : ''}
-          ${ends && status === 'active' ? `<span>${ends}</span>` : ''}
+          ${created?`<span>${created}</span>`:''}
+          ${ends?`<span>${ends}</span>`:''}
         </div>
       </div>
       <div class="event-actions">
         <a href="app.html?code=${code}" target="_blank" class="btn btn-orange btn-sm btn-icon" title="Observer">👁</a>
         <button class="btn btn-blue btn-sm" onclick="copyLink('${code}')" title="Copier le lien participants">🔗</button>
         <button class="btn btn-gray btn-sm" onclick="openStats('${code}','${(ev.name||code).replace(/'/g,"\\'")}')">📊</button>
-        ${status !== 'archived' ? `<button class="btn btn-ghost btn-sm" onclick="archiveEvent('${code}','${(ev.name||code).replace(/'/g,"\\'")}')">📦 Archiver</button>` : ''}
+        ${status!=='archived'?`<button class="btn btn-ghost btn-sm" onclick="archiveEvent('${code}','${(ev.name||code).replace(/'/g,"\\'")}')">📦 Archiver</button>`:''}
         <button class="btn btn-red btn-sm btn-icon" onclick="deleteEvent('${code}','${(ev.name||code).replace(/'/g,"\\'")}')">🗑</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── Copy link ──
 window.copyLink = (code) => {
   const url = `${location.origin}${location.pathname.replace('dashboard.html','app.html')}?code=${code}`;
   navigator.clipboard.writeText(url).then(() => toast('✅ Lien copié !', 'success'));
 };
 
-// ── Archive ──
 window.archiveEvent = async (code, name) => {
-  const ok = await confirm(`Archiver l'événement "${name}" ? Il ne sera plus visible comme actif.`);
+  const ok = await confirmDialog(`Archiver "${name}" ?`);
   if (!ok) return;
-  await update(ref(db, `events/${code}`), { archived: true, active: false });
-  toast('📦 Événement archivé', 'success');
+  await update(ref(db, `events/${code}`), { archived:true, active:false });
+  toast('📦 Archivé', 'success');
 };
 
-// ── Delete ──
 window.deleteEvent = async (code, name) => {
-  const ok = await confirm(`Supprimer définitivement "${name}" (code : ${code}) ? Cette action supprime aussi toutes les positions et l'historique.`);
+  const ok = await confirmDialog(`Supprimer définitivement "${name}" (${code}) ? Positions et historique supprimés.`);
   if (!ok) return;
-  await remove(ref(db, `events/${code}`));
-  await remove(ref(db, `positions/${code}`));
-  await remove(ref(db, `history/${code}`));
-  toast('🗑 Événement supprimé', '');
+  await Promise.all([
+    remove(ref(db, `events/${code}`)),
+    remove(ref(db, `positions/${code}`)),
+    remove(ref(db, `history/${code}`))
+  ]);
+  toast('🗑 Supprimé', '');
 };
 
-// ── Stats modal ──
 window.openStats = async (code, name) => {
   document.getElementById('stats-modal-title').textContent = `Statistiques — ${name}`;
   document.getElementById('stats-modal-overlay').style.display = 'flex';
   document.getElementById('stats-modal-body').innerHTML = '<div class="loader">Chargement…</div>';
-
   const [histSnap, posSnap] = await Promise.all([
     get(ref(db, `history/${code}`)),
     get(ref(db, `positions/${code}`))
   ]);
-
-  const hist = histSnap.val() || {};
-  const pos = posSnap.val() || {};
-
+  const hist = histSnap.val()||{}, pos = posSnap.val()||{};
   const participants = Object.entries(hist);
-  const nbParticipants = participants.length;
-
-  let totalDist = 0;
-  const rows = [];
-  let colorIdx = 0;
-
-  function haversine(lat1,lng1,lat2,lng2) {
-    const R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
-    const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-  }
-
-  function formatDist(m) { return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(2)} km`; }
-
-  participants.forEach(([pid, entries]) => {
-    const sorted = Object.values(entries).sort((a,b)=>a.ts-b.ts);
-    let dist = 0;
-    for (let i=1;i<sorted.length;i++) {
-      const d = haversine(sorted[i-1].lat,sorted[i-1].lng,sorted[i].lat,sorted[i].lng);
-      if (d>5) dist+=d;
-    }
-    totalDist += dist;
-    const pseudo = sorted[0].pseudo || pid;
-    const color = COLORS[colorIdx++ % COLORS.length];
-    const lastActive = sorted[sorted.length-1].ts;
-    const isOnline = pos[pid] && (Date.now()-lastActive < 120000);
-    rows.push({ pseudo, dist, lastActive, isOnline, color });
-  });
-
-  rows.sort((a,b)=>b.dist-a.dist);
-
-  const avgDist = nbParticipants > 0 ? totalDist/nbParticipants : 0;
-  const onlineCount = rows.filter(r=>r.isOnline).length;
-
-  document.getElementById('stats-modal-body').innerHTML = `
+  function haversine(a,b,c,d){const R=6371000,dL=(c-a)*Math.PI/180,dl=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dl/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+  function fmt(m){return m<1000?`${Math.round(m)} m`:`${(m/1000).toFixed(2)} km`;}
+  let totalDist=0, colorIdx=0;
+  const rows = participants.map(([pid,entries])=>{
+    const sorted=Object.values(entries).sort((a,b)=>a.ts-b.ts);
+    let dist=0;
+    for(let i=1;i<sorted.length;i++){const d=haversine(sorted[i-1].lat,sorted[i-1].lng,sorted[i].lat,sorted[i].lng);if(d>5)dist+=d;}
+    totalDist+=dist;
+    const isOnline=pos[pid]&&(Date.now()-sorted[sorted.length-1].ts<120000);
+    return {pseudo:sorted[0].pseudo||pid,dist,lastActive:sorted[sorted.length-1].ts,isOnline,color:COLORS[colorIdx++%COLORS.length]};
+  }).sort((a,b)=>b.dist-a.dist);
+  const nb=participants.length, online=rows.filter(r=>r.isOnline).length;
+  document.getElementById('stats-modal-body').innerHTML=`
     <div class="stats-grid">
-      <div class="stat-box"><div class="val">${nbParticipants}</div><div class="lbl">Participants enregistrés</div></div>
-      <div class="stat-box"><div class="val" style="color:#4ade80">${onlineCount}</div><div class="lbl">En ligne maintenant</div></div>
-      <div class="stat-box"><div class="val">${formatDist(totalDist)}</div><div class="lbl">Distance cumulée</div></div>
-      <div class="stat-box"><div class="val">${formatDist(avgDist)}</div><div class="lbl">Distance moyenne</div></div>
+      <div class="stat-box"><div class="val">${nb}</div><div class="lbl">Participants</div></div>
+      <div class="stat-box"><div class="val" style="color:#4ade80">${online}</div><div class="lbl">En ligne</div></div>
+      <div class="stat-box"><div class="val">${fmt(totalDist)}</div><div class="lbl">Distance cumulée</div></div>
+      <div class="stat-box"><div class="val">${fmt(nb>0?totalDist/nb:0)}</div><div class="lbl">Distance moyenne</div></div>
     </div>
-    ${rows.length ? `
-    <table class="participant-table">
-      <thead><tr>
-        <th>Participant</th>
-        <th>Distance</th>
-        <th>Statut</th>
-        <th>Dernière position</th>
-      </tr></thead>
-      <tbody>${rows.map(r=>`
-        <tr>
-          <td><span class="participant-dot" style="background:${r.color}"></span>${r.pseudo}</td>
-          <td>${formatDist(r.dist)}</td>
-          <td><span class="pill ${r.isOnline?'live':'ended'}">${r.isOnline?'En ligne':'Hors ligne'}</span></td>
-          <td style="color:#64748b">${new Date(r.lastActive).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>` : '<p style="color:#64748b;font-size:0.82rem;text-align:center;padding:16px">Aucun participant enregistré.</p>'}
+    ${rows.length?`<table class="participant-table"><thead><tr><th>Participant</th><th>Distance</th><th>Statut</th><th>Dernière pos.</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td><span class="participant-dot" style="background:${r.color}"></span>${r.pseudo}</td><td>${fmt(r.dist)}</td><td><span class="pill ${r.isOnline?'live':'ended'}">${r.isOnline?'En ligne':'Hors ligne'}</span></td><td style="color:#64748b">${new Date(r.lastActive).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</td></tr>`).join('')}
+    </tbody></table>`:'<p style="color:#64748b;font-size:0.82rem;text-align:center;padding:16px">Aucun participant.</p>'}
     <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
       <a href="app.html?code=${code}&replay=1" target="_blank" class="btn btn-blue btn-sm">⏪ Replay</a>
       <a href="app.html?code=${code}" target="_blank" class="btn btn-orange btn-sm">👁 Observer</a>
-    </div>
-  `;
+    </div>`;
 };
 
-document.getElementById('stats-modal-close').addEventListener('click', () => {
-  document.getElementById('stats-modal-overlay').style.display = 'none';
+document.getElementById('stats-modal-close').addEventListener('click',()=>{
+  document.getElementById('stats-modal-overlay').style.display='none';
 });
 
-// ── Create event modal ──
-let editingCode = null;
-let wpCount = 0;
+// ── Create event ──
+let editingCode=null, wpCount=0;
 
-document.getElementById('btn-new-event').addEventListener('click', () => {
-  editingCode = null;
-  wpCount = 0;
-  document.getElementById('modal-title').textContent = 'Créer un événement';
-  document.getElementById('modal-save').textContent = 'Créer';
-  document.getElementById('f-code').disabled = false;
-  ['f-name','f-code','f-start-label','f-start-lat','f-start-lng','f-end-label','f-end-lat','f-end-lng'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
-  document.getElementById('f-duration').value = '8';
-  document.getElementById('f-waypoints').innerHTML = '';
+document.getElementById('btn-new-event').addEventListener('click',()=>{
+  editingCode=null; wpCount=0;
+  document.getElementById('modal-title').textContent='Créer un événement';
+  document.getElementById('modal-save').textContent='Créer';
+  document.getElementById('f-code').disabled=false;
+  ['f-name','f-code','f-start-label','f-start-lat','f-start-lng','f-end-label','f-end-lat','f-end-lng'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-duration').value='8';
+  document.getElementById('f-waypoints').innerHTML='';
   document.getElementById('modal-overlay').classList.add('open');
 });
 
-document.getElementById('modal-cancel').addEventListener('click', () => {
+document.getElementById('modal-cancel').addEventListener('click',()=>{
   document.getElementById('modal-overlay').classList.remove('open');
 });
 
-document.getElementById('f-code').addEventListener('input', e => {
-  e.target.value = e.target.value.toUpperCase().replace(/\s/g,'');
+document.getElementById('f-code').addEventListener('input',e=>{
+  e.target.value=e.target.value.toUpperCase().replace(/\s/g,'');
 });
 
-document.getElementById('f-btn-add-wp').addEventListener('click', () => {
-  if (wpCount >= 5) return toast('Maximum 5 étapes', 'error');
-  const idx = wpCount++;
-  const div = document.createElement('div');
-  div.id = `wp-block-${idx}`;
-  div.innerHTML = `
+document.getElementById('f-btn-add-wp').addEventListener('click',()=>{
+  if(wpCount>=5)return toast('Maximum 5 étapes','error');
+  const idx=wpCount++;
+  const div=document.createElement('div');
+  div.id=`wp-block-${idx}`;
+  div.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
       <span style="font-size:0.75rem;color:#94a3b8">Étape ${idx+1}</span>
       <button class="btn btn-red btn-sm btn-icon" onclick="document.getElementById('wp-block-${idx}').remove()">✕</button>
@@ -557,73 +467,53 @@ document.getElementById('f-btn-add-wp').addEventListener('click', () => {
     <div style="display:flex;gap:6px;margin-bottom:8px">
       <input id="wp-lat-${idx}" placeholder="Latitude" style="flex:1;padding:7px 10px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:0.82rem;outline:none"/>
       <input id="wp-lng-${idx}" placeholder="Longitude" style="flex:1;padding:7px 10px;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:0.82rem;outline:none"/>
-    </div>
-  `;
+    </div>`;
   document.getElementById('f-waypoints').appendChild(div);
 });
 
-document.getElementById('modal-save').addEventListener('click', async () => {
-  const name = document.getElementById('f-name').value.trim();
-  const code = document.getElementById('f-code').value.trim().toUpperCase();
-  const duration = parseInt(document.getElementById('f-duration').value) || 8;
-
-  if (!name || !code) return toast('Nom et code obligatoires', 'error');
-  if (!/^[A-Z0-9]+$/.test(code)) return toast('Code : lettres et chiffres uniquement', 'error');
-
-  if (!editingCode) {
-    const existing = await get(ref(db, `events/${code}`));
-    if (existing.exists()) return toast(`Le code "${code}" est déjà pris`, 'error');
+document.getElementById('modal-save').addEventListener('click',async()=>{
+  const name=document.getElementById('f-name').value.trim();
+  const code=document.getElementById('f-code').value.trim().toUpperCase();
+  const duration=parseInt(document.getElementById('f-duration').value)||8;
+  if(!name||!code)return toast('Nom et code obligatoires','error');
+  if(!/^[A-Z0-9]+$/.test(code))return toast('Code : lettres et chiffres uniquement','error');
+  if(!editingCode){
+    const existing=await get(ref(db,`events/${code}`));
+    if(existing.exists())return toast(`Le code "${code}" est déjà pris`,'error');
   }
-
-  const eventData = {
-    name, code,
-    ownerUid: currentUser.uid,
-    createdAt: editingCode ? undefined : Date.now(),
-    endsAt: Date.now() + duration * 3600000,
-    active: true,
-    archived: false
-  };
-  if (editingCode) delete eventData.createdAt;
-
-  const sLat = parseFloat(document.getElementById('f-start-lat').value);
-  const sLng = parseFloat(document.getElementById('f-start-lng').value);
-  const sLabel = document.getElementById('f-start-label').value.trim();
-  if (!isNaN(sLat) && !isNaN(sLng)) eventData.start = { lat:sLat, lng:sLng, label:sLabel };
-
-  const eLat = parseFloat(document.getElementById('f-end-lat').value);
-  const eLng = parseFloat(document.getElementById('f-end-lng').value);
-  const eLabel = document.getElementById('f-end-label').value.trim();
-  if (!isNaN(eLat) && !isNaN(eLng)) eventData.end = { lat:eLat, lng:eLng, label:eLabel };
-
-  const wps = [];
-  for (let i = 0; i < wpCount; i++) {
-    const el = document.getElementById(`wp-block-${i}`);
-    if (!el) continue;
-    const wLat = parseFloat(document.getElementById(`wp-lat-${i}`)?.value);
-    const wLng = parseFloat(document.getElementById(`wp-lng-${i}`)?.value);
-    const wLabel = document.getElementById(`wp-label-${i}`)?.value.trim() || `Étape ${i+1}`;
-    if (!isNaN(wLat) && !isNaN(wLng)) wps.push({ lat:wLat, lng:wLng, label:wLabel });
+  const eventData={name,code,ownerUid:currentUser.uid,endsAt:Date.now()+duration*3600000,active:true,archived:false};
+  if(!editingCode)eventData.createdAt=Date.now();
+  const sLat=parseFloat(document.getElementById('f-start-lat').value);
+  const sLng=parseFloat(document.getElementById('f-start-lng').value);
+  const sLabel=document.getElementById('f-start-label').value.trim();
+  if(!isNaN(sLat)&&!isNaN(sLng))eventData.start={lat:sLat,lng:sLng,label:sLabel};
+  const eLat=parseFloat(document.getElementById('f-end-lat').value);
+  const eLng=parseFloat(document.getElementById('f-end-lng').value);
+  const eLabel=document.getElementById('f-end-label').value.trim();
+  if(!isNaN(eLat)&&!isNaN(eLng))eventData.end={lat:eLat,lng:eLng,label:eLabel};
+  const wps=[];
+  for(let i=0;i<wpCount;i++){
+    const el=document.getElementById(`wp-block-${i}`);
+    if(!el)continue;
+    const wLat=parseFloat(document.getElementById(`wp-lat-${i}`)?.value);
+    const wLng=parseFloat(document.getElementById(`wp-lng-${i}`)?.value);
+    const wLabel=document.getElementById(`wp-label-${i}`)?.value.trim()||`Étape ${i+1}`;
+    if(!isNaN(wLat)&&!isNaN(wLng))wps.push({lat:wLat,lng:wLng,label:wLabel});
   }
-  if (wps.length) eventData.waypoints = wps;
-
-  const targetCode = editingCode || code;
-  if (editingCode) {
-    await update(ref(db, `events/${targetCode}`), eventData);
-    toast('✅ Événement mis à jour', 'success');
-  } else {
-    await set(ref(db, `events/${targetCode}`), eventData);
-    toast(`✅ Événement "${name}" créé — code : ${code}`, 'success');
+  if(wps.length)eventData.waypoints=wps;
+  const targetCode=editingCode||code;
+  if(editingCode){
+    await update(ref(db,`events/${targetCode}`),eventData);
+    toast('✅ Événement mis à jour','success');
+  }else{
+    await set(ref(db,`events/${targetCode}`),eventData);
+    toast(`✅ "${name}" créé — code : ${code}`,'success');
   }
-
   document.getElementById('modal-overlay').classList.remove('open');
 });
 
-// ── URL param: auto-open watch ──
-const params = new URLSearchParams(location.search);
-if (params.get('code')) {
-  // Pass-through: redirect to app.html if a code is in the URL
-  location.href = `app.html?code=${params.get('code')}`;
-}
+const params=new URLSearchParams(location.search);
+if(params.get('code'))location.href=`app.html?code=${params.get('code')}`;
 </script>
 </body>
 </html>
