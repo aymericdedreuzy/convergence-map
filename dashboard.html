@@ -211,7 +211,7 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, get, remove, update, onValue, off } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBAU9uBrrbbMbW2mvNobcxvbss1AgrhmIk",
@@ -253,21 +253,14 @@ function confirmDialog(text) {
 let currentUser = null;
 let eventsUnsub = null;
 
-// Récupérer le résultat du redirect Google au retour
-getRedirectResult(auth).then(result => {
-  if (result?.user) {
-    // Connexion réussie via redirect — onAuthStateChanged prendra le relais
-  }
-}).catch(e => {
-  toast('Erreur de connexion : ' + e.message, 'error');
-  document.getElementById('auth-loading').style.display = 'none';
-});
-
 document.getElementById('btn-google-login').addEventListener('click', async () => {
-  document.getElementById('auth-loading').style.display = 'block';
-  document.getElementById('btn-google-login').style.display = 'none';
-  await signInWithRedirect(auth, provider);
-  // La page se recharge automatiquement au retour
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    toast('Erreur de connexion : ' + e.message, 'error');
+    document.getElementById('auth-loading').style.display = 'none';
+    document.getElementById('btn-google-login').style.display = 'flex';
+  }
 });
 
 document.getElementById('btn-logout').addEventListener('click', async () => {
