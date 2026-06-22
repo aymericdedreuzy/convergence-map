@@ -349,7 +349,7 @@ function renderEvents(entries) {
         </div>
       </div>
       <div class="event-actions">
-        <a href="app.html?code=${code}" target="_blank" class="btn btn-orange btn-sm btn-icon" title="Observer">👁</a>
+        <a href="app.html?code=${code}&mode=watch" target="_blank" class="btn btn-orange btn-sm btn-icon" title="Observer">👁</a>
         <button class="btn btn-blue btn-sm" onclick="copyLink('${code}')" title="Copier le lien participants">🔗</button>
         <button class="btn btn-gray btn-sm" onclick="openStats('${code}','${(ev.name||code).replace(/'/g,"\\'")}')">📊</button>
         ${status!=='archived'?`<button class="btn btn-ghost btn-sm" onclick="archiveEvent('${code}','${(ev.name||code).replace(/'/g,"\\'")}')">📦 Archiver</button>`:''}
@@ -416,7 +416,7 @@ window.openStats = async (code, name) => {
     </tbody></table>`:'<p style="color:#64748b;font-size:0.82rem;text-align:center;padding:16px">Aucun participant.</p>'}
     <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end">
       <a href="app.html?code=${code}&replay=1" target="_blank" class="btn btn-blue btn-sm">⏪ Replay</a>
-      <a href="app.html?code=${code}" target="_blank" class="btn btn-orange btn-sm">👁 Observer</a>
+      <a href="app.html?code=${code}&mode=watch" target="_blank" class="btn btn-orange btn-sm">👁 Observer</a>
     </div>`;
 };
 
