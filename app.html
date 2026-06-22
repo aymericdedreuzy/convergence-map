@@ -725,6 +725,7 @@ document.getElementById('btn-do-join').addEventListener('click', async () => {
     myParticipantId = crypto.randomUUID();
     localStorage.setItem(storageKey, myParticipantId);
   }
+  localStorage.setItem(`pseudo_${code}`, pseudo);
   setStatus(`📍 Live — ${pseudo}${team?' · '+team:''} @ ${code}`,'live');
   closePanel();
   document.getElementById('btn-stop').style.display='inline-block';
@@ -1223,6 +1224,47 @@ async function startVideoExport() {
   recorder.stop();
 }
 
+// ── Auto-join / Auto-watch depuis paramètres URL ──────────────────────────
+(async () => {
+  const params = new URLSearchParams(location.search);
+  const urlCode = params.get('code');
+  const urlMode = params.get('mode'); // 'watch' ou absent (= join)
+
+  if (!urlCode) return;
+
+  if (urlMode === 'watch') {
+    // Cas organisateur : dashboard → app.html?code=XXX&mode=watch
+    const snap = await get(ref(db, `events/${urlCode}`));
+    if (!snap.exists()) return;
+    currentEventCode = urlCode;
+    currentLicence = await getLicence(db, { code: urlCode });
+    const existingBadge = document.getElementById('plan-badge');
+    if (existingBadge) existingBadge.remove();
+    const badge = document.createElement('span');
+    badge.id = 'plan-badge';
+    badge.innerHTML = renderPlanBadge(currentLicence.plan);
+    document.getElementById('topbar').appendChild(badge);
+    setStatus(`👁 Observation — ${urlCode}`, 'live');
+    document.getElementById('participants-list').style.display = 'block';
+    document.getElementById('btn-replay').style.display = 'inline-block';
+    startWatching(urlCode);
+
+  } else {
+    // Cas participant : index.html → app.html?code=XXX
+    // Pré-remplir le code et ouvrir le panneau join
+    document.getElementById('join-code').value = urlCode;
+    showPanel('join');
+    // Si un pseudo est mémorisé localement, rejoindre automatiquement
+    const storageKey = `participant_${urlCode}`;
+    const savedId = localStorage.getItem(storageKey);
+    const savedPseudo = localStorage.getItem(`pseudo_${urlCode}`);
+    if (savedPseudo) {
+      document.getElementById('join-pseudo').value = savedPseudo;
+      document.getElementById('btn-do-join').click();
+    }
+    // Sinon, le panneau est ouvert et pré-rempli, l'user n'a qu'à saisir son pseudo
+  }
+})();
 </script>
 </body>
 </html>
