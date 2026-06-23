@@ -386,7 +386,6 @@ function buildPopup(pid) {
   const inactiveMin = Math.floor((now-s.lastTs)/60000);
   const inactiveStr = inactiveMin<1?'actif':`inactif depuis ${inactiveMin} min`;
   const inactiveColor = inactiveMin>=10?'#ef4444':inactiveMin>=3?'#f97316':'#4ade80';
-  const teamStr = s.team ? `<span style="color:#a855f7">👥 ${s.team}</span>` : '';
   return `<div style="min-width:160px;font-family:system-ui;font-size:13px">
     <b style="font-size:14px">${s.pseudo}</b>${s.team?`<br><span style="font-size:11px;color:#a855f7">👥 ${s.team}</span>`:''}
     <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">
@@ -500,10 +499,19 @@ async function startWatching(code) {
     currentEventName = evData.name || code;
   }
 
+  // ── Filtre historique selon historyDays du plan ──
+  const historyDays = currentLicence.limits.historyDays;
+  const cutoff = historyDays === Infinity
+    ? 0
+    : Date.now() - historyDays * 24 * 3600 * 1000;
+
   const histSnap = await get(ref(db, `history/${code}`));
   const histData = histSnap.val() || {};
   Object.entries(histData).forEach(([pid, entries]) => {
-    const sorted = Object.values(entries).sort((a,b) => a.ts-b.ts);
+    const sorted = Object.values(entries)
+      .filter(e => e.ts >= cutoff)   // ← filtre selon le plan
+      .sort((a,b) => a.ts-b.ts);
+    if (!sorted.length) return;
     liveTrails[pid] = sorted.map(e => [e.lat, e.lng]);
     const color = getColor(pid);
     if (livePolylines[pid]) map.removeLayer(livePolylines[pid]);
@@ -601,7 +609,6 @@ function fillEndStats() {
     document.getElementById('end-stat-duration').textContent = h>0 ? `${h}h${String(m).padStart(2,'0')}` : `${m} min`;
   }
 
-  // Distance moyenne par participant
   let totalDist = 0;
   Object.entries(replayRawPoints).forEach(([pid, pts]) => {
     let d = 0;
@@ -611,7 +618,6 @@ function fillEndStats() {
   const avgDist = nbParticipants > 0 ? totalDist/nbParticipants : 0;
   document.getElementById('end-stat-distance').textContent = formatDist(avgDist);
 
-  // Total points GPS
   let totalPts = 0;
   Object.values(replayRawPoints).forEach(pts => totalPts += pts.length);
   document.getElementById('end-stat-points').textContent = totalPts;
@@ -642,7 +648,6 @@ function renderReplayFrame(idx) {
   const h=Math.floor(elapsed/3600000), m=Math.floor((elapsed%3600000)/60000), s=Math.floor((elapsed%60000)/1000);
   document.getElementById('replay-time').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
-  // Fin de replay
   if (idx >= replayTimestamps.length-1) {
     fillEndStats();
     showEndScreen(true);
@@ -658,10 +663,18 @@ document.getElementById('btn-pick-start').addEventListener('click', ()=>enterPic
 document.getElementById('btn-pick-end').addEventListener('click', ()=>enterPickMode('end'));
 
 document.getElementById('btn-do-create').addEventListener('click', async () => {
-  const name=document.getElementById('create-name').value.trim();
-  const code=document.getElementById('create-code').value.trim().toUpperCase();
-  const duration=parseInt(document.getElementById('create-duration').value)||8;
-  if (!name||!code) return alert('Remplis le nom et le code');
+  const name = document.getElementById('create-name').value.trim();
+  const code = document.getElementById('create-code').value.trim().toUpperCase();
+  const duration = parseInt(document.getElementById('create-duration').value) || 8;
+  if (!name || !code) return alert('Remplis le nom et le code');
+
+  // ── Vérification durée selon licence ──
+  const licenceForCreate = await getLicence(db, { code, uid: currentUser?.uid });
+  const maxDuration = licenceForCreate.limits.maxEventDuration;
+  if (maxDuration < Infinity && duration > maxDuration) {
+    return alert(`⚠️ Votre plan ${licenceForCreate.limits.label} limite la durée d'un événement à ${maxDuration}h.\n\nPassez au plan Pro pour des événements sans limite de durée.`);
+  }
+
   const existing = await get(ref(db,`events/${code}`));
   if (existing.exists()) return alert(`Le code "${code}" est déjà utilisé.`);
   const eventData = { name, code, createdAt:Date.now(), endsAt:Date.now()+duration*3600000, active:true };
@@ -698,7 +711,7 @@ document.getElementById('btn-do-join').addEventListener('click', async () => {
   if (!snap.exists()) return alert('Événement introuvable');
 
   // ── Vérification licence ──
-  currentLicence = await getLicence(db, { code });
+  currentLicence = await getLicence(db, { code, uid: currentUser?.uid });
   const limits = currentLicence.limits;
 
   // Vérifier le nombre de participants actuels vs limite du plan
@@ -706,7 +719,7 @@ document.getElementById('btn-do-join').addEventListener('click', async () => {
     const posSnap = await get(ref(db, `positions/${code}`));
     const currentCount = posSnap.exists() ? Object.keys(posSnap.val()).length : 0;
     if (currentCount >= limits.maxParticipants) {
-      return alert(`⚠️ Cet événement est limité à ${limits.maxParticipants} participants (plan ${currentLicence.plan}).\n\nL'organisateur doit passer au plan supérieur pour accueillir plus de participants.`);
+      return alert(`⚠️ Cet événement est limité à ${limits.maxParticipants} participants (plan ${currentLicence.limits.label}).\n\nL'organisateur doit passer au plan supérieur pour accueillir plus de participants.`);
     }
   }
 
@@ -768,7 +781,7 @@ document.getElementById('btn-do-watch').addEventListener('click', async () => {
   currentEventCode=code;
 
   // ── Vérification licence ──
-  currentLicence = await getLicence(db, { code });
+  currentLicence = await getLicence(db, { code, uid: currentUser?.uid });
   const existingBadge = document.getElementById('plan-badge');
   if (existingBadge) existingBadge.remove();
   const badge = document.createElement('span');
@@ -823,13 +836,22 @@ document.getElementById('btn-replay').addEventListener('click', async ()=>{
   document.querySelector('input[value=parchment]').checked=true;
   currentLayer='parchment';
 
+  // ── Filtre replay selon historyDays du plan ──
+  const historyDays = currentLicence.limits.historyDays;
+  const cutoff = historyDays === Infinity
+    ? 0
+    : Date.now() - historyDays * 24 * 3600 * 1000;
+
   const snap=await get(ref(db,`history/${currentEventCode}`));
   const raw=snap.val()||{};
   replayData={}; replayRawPoints={};
   let allTs=new Set();
 
   Object.entries(raw).forEach(([pid, entries])=>{
-    const sorted = Object.values(entries).sort((a,b)=>a.ts-b.ts);
+    const sorted = Object.values(entries)
+      .filter(e => e.ts >= cutoff)   // ← filtre selon le plan
+      .sort((a,b)=>a.ts-b.ts);
+    if (!sorted.length) return;
     replayRawPoints[pid] = sorted;
     if (sorted[0]?.team) participantTeams[pid] = sorted[0].team;
     const interpolated = interpolateTrack(sorted);
@@ -848,7 +870,6 @@ document.getElementById('btn-replay').addEventListener('click', async ()=>{
   document.getElementById('replay-bar').classList.add('visible');
   document.getElementById('replay-slider').max=replayTimestamps.length-1;
   replayIndex=0; replayPlaying=false;
-  // Watermark visible uniquement en freemium
   showWatermark(currentLicence.limits.branding);
   showEndScreen(false);
   renderReplayFrame(0);
@@ -941,16 +962,12 @@ async function startVideoExport() {
   canvas.style.display = 'block';
   const ctx = canvas.getContext('2d');
 
-  // Fermer l'écran de fin, rembobiner
   showEndScreen(false);
   replayIndex = 0;
-
-  // Arrêter le replay normal
   clearInterval(replayInterval);
   replayPlaying = false;
   document.getElementById('replay-play-btn').textContent = '▶';
 
-  // MediaRecorder setup
   let stream, recorder, chunks = [];
   try {
     stream = canvas.captureStream(30);
@@ -974,13 +991,12 @@ async function startVideoExport() {
 
   recorder.start();
 
-  // ── Fond de carte : pré-charger les tuiles avec crossOrigin ──
   const TILE_URLS = {
     osm:       (z,x,y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
     topo:      (z,x,y) => `https://a.tile.opentopomap.org/${z}/${x}/${y}.png`,
     dark:      (z,x,y) => `https://a.basemaps.cartocdn.com/dark_all/${z}/${x}/${y}.png`,
     parchment: (z,x,y) => `https://a.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}.png`,
-    satellite: null // Esri bloque CORS → fond uni
+    satellite: null
   };
 
   function getTileRange() {
@@ -1042,13 +1058,11 @@ async function startVideoExport() {
   const tileMap = await preloadTiles();
   setStatus('⏺ Export en cours…', 'replay');
 
-  // Helper : lat/lng → pixel Leaflet
   function latLngToPixel(lat, lng) {
     const pt = map.latLngToContainerPoint(L.latLng(lat, lng));
     return { x: pt.x, y: pt.y };
   }
 
-  // Helper : dessine une bulle prénom + équipe au-dessus d'un point
   function drawBubble(ctx, x, y, pseudo, team, color) {
     const label = team ? `${pseudo} · ${team}` : pseudo;
     const fontSize = 11;
@@ -1056,8 +1070,6 @@ async function startVideoExport() {
     const tw = ctx.measureText(label).width;
     const bw = tw + 16, bh = 20;
     const bx = x - bw/2, by = y - bh - 14;
-
-    // Bulle fond
     ctx.beginPath();
     ctx.roundRect(bx, by, bw, bh, 6);
     ctx.fillStyle = 'rgba(15,23,42,0.82)';
@@ -1065,14 +1077,10 @@ async function startVideoExport() {
     ctx.strokeStyle = color;
     ctx.lineWidth = 1.2;
     ctx.stroke();
-
-    // Texte
     ctx.fillStyle = '#e2e8f0';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(label, x, by + bh/2);
-
-    // Dot
     ctx.beginPath();
     ctx.arc(x, y - 2, 6, 0, Math.PI*2);
     ctx.fillStyle = color;
@@ -1082,7 +1090,6 @@ async function startVideoExport() {
     ctx.stroke();
   }
 
-  // Helper : dessine les trails
   function drawTrail(ctx, points, color) {
     if (points.length < 2) return;
     ctx.beginPath();
@@ -1095,7 +1102,6 @@ async function startVideoExport() {
     ctx.globalAlpha = 1;
   }
 
-  // Helper : watermark
   function drawWatermark(ctx, W, H) {
     const text = '🗺️ Créé avec Convergence Map';
     ctx.font = '600 11px system-ui, sans-serif';
@@ -1115,17 +1121,9 @@ async function startVideoExport() {
     ctx.fillText(text, W/2, by + bh/2);
   }
 
-  // Watermark — forcé en freemium, optionnel sinon
   const showWatermarkInVideo = currentLicence.limits.branding;
-
-  // Boucle d'export frame par frame — vitesse = celle du sélecteur replay
   const exportSpeed = replaySpeed;
-  const frameInterval = 200 / exportSpeed;
   const totalFrames = replayTimestamps.length;
-
-  // Nombre de frames à sauter par tick selon la vitesse choisie
-  // À 1x : on avance 1 frame par tick (33ms → ~30fps)
-  // À 10x : on avance 10 frames par tick → vidéo 10x plus courte
   const framesPerTick = Math.max(1, Math.round(exportSpeed));
 
   const exportLoop = () => {
@@ -1135,34 +1133,22 @@ async function startVideoExport() {
         if (idx >= totalFrames) { resolve(); return; }
         const ts = replayTimestamps[idx];
         ctx.clearRect(0, 0, W, H);
-
-        // Fond de carte
         drawTiles(ctx, tileMap);
-
-        // Dessiner trails + markers
         Object.entries(replayData).forEach(([pid, entries]) => {
           const color = getColor(pid);
           const times = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>a-b);
           if (!times.length) return;
-
-          // Trail
           const trailPts = times.map(t => {
             const p = entries[t];
             return latLngToPixel(p.lat, p.lng);
           });
           drawTrail(ctx, trailPts, color);
-
-          // Position courante
           const curT = times[times.length-1];
           const pos = entries[curT];
           const px = latLngToPixel(pos.lat, pos.lng);
           drawBubble(ctx, px.x, px.y, pos.pseudo||pid, pos.team||'', color);
         });
-
-        // Watermark — forcé en freemium
         if (showWatermarkInVideo) drawWatermark(ctx, W, H);
-
-        // Timestamp — date et heure réelles
         const realDate = new Date(ts);
         const dateStr = realDate.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
         const timeStr = realDate.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
@@ -1179,9 +1165,8 @@ async function startVideoExport() {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(fullStr, bx2 + bw2/2, by2 + bh2/2);
-
         idx += framesPerTick;
-        setTimeout(step, 33); // ~30fps canvas, vitesse via framesPerTick
+        setTimeout(step, 33);
       };
       step();
     });
@@ -1189,7 +1174,6 @@ async function startVideoExport() {
 
   await exportLoop();
 
-  // Écran de fin dans la vidéo (2s)
   const endFrames = 60;
   await new Promise(resolve => {
     let ef = 0;
@@ -1198,23 +1182,17 @@ async function startVideoExport() {
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = 'rgba(10,17,32,0.92)';
       ctx.fillRect(0, 0, W, H);
-
-      // Titre
       ctx.font = '800 28px system-ui, sans-serif';
       ctx.fillStyle = '#e2e8f0';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('🏁 ' + (currentEventName || currentEventCode), W/2, H/2 - 30);
-
       ctx.font = '500 14px system-ui, sans-serif';
       ctx.fillStyle = '#64748b';
       ctx.fillText(`${Object.keys(replayData).length} participants`, W/2, H/2 + 10);
-
-      // Branding
       ctx.font = '700 13px system-ui, sans-serif';
       ctx.fillStyle = '#38bdf8';
       ctx.fillText('Créé avec Convergence Map', W/2, H/2 + 50);
-
       ef++;
       setTimeout(endStep, 33);
     };
@@ -1224,20 +1202,19 @@ async function startVideoExport() {
   recorder.stop();
 }
 
-// ── Auto-join / Auto-watch depuis paramètres URL ──────────────────────────
+// ── Auto-join / Auto-watch depuis paramètres URL ──
 (async () => {
   const params = new URLSearchParams(location.search);
   const urlCode = params.get('code');
-  const urlMode = params.get('mode'); // 'watch' ou absent (= join)
+  const urlMode = params.get('mode');
 
   if (!urlCode) return;
 
   if (urlMode === 'watch') {
-    // Cas organisateur : dashboard → app.html?code=XXX&mode=watch
     const snap = await get(ref(db, `events/${urlCode}`));
     if (!snap.exists()) return;
     currentEventCode = urlCode;
-    currentLicence = await getLicence(db, { code: urlCode });
+    currentLicence = await getLicence(db, { code: urlCode, uid: currentUser?.uid });
     const existingBadge = document.getElementById('plan-badge');
     if (existingBadge) existingBadge.remove();
     const badge = document.createElement('span');
@@ -1250,19 +1227,13 @@ async function startVideoExport() {
     startWatching(urlCode);
 
   } else {
-    // Cas participant : index.html → app.html?code=XXX
-    // Pré-remplir le code et ouvrir le panneau join
     document.getElementById('join-code').value = urlCode;
     showPanel('join');
-    // Si un pseudo est mémorisé localement, rejoindre automatiquement
-    const storageKey = `participant_${urlCode}`;
-    const savedId = localStorage.getItem(storageKey);
     const savedPseudo = localStorage.getItem(`pseudo_${urlCode}`);
     if (savedPseudo) {
       document.getElementById('join-pseudo').value = savedPseudo;
       document.getElementById('btn-do-join').click();
     }
-    // Sinon, le panneau est ouvert et pré-rempli, l'user n'a qu'à saisir son pseudo
   }
 })();
 </script>
