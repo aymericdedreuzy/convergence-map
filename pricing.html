@@ -87,6 +87,8 @@ nav {
 
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 .hero-visual { margin-bottom: 40px; }
+
+.btn-primary {
   background: var(--sky); color: #0f172a;
   padding: 12px 26px; border-radius: 10px;
   font-size: 0.88rem; font-weight: 700;
@@ -103,13 +105,6 @@ nav {
   display: inline-flex; align-items: center; gap: 7px;
 }
 .btn-secondary:hover { border-color: var(--sky); color: var(--sky); }
-
-.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
-.hero-tag {
-  font-size: 0.72rem; color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 20px; padding: 3px 11px;
-}
 
 /* ── CANVAS HERO ── */
 #convergence-canvas {
@@ -181,7 +176,7 @@ section { padding: 80px 32px; }
   align-items: start;
 }
 .pricing-card {
-  background: var(--surface);
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 28px 26px 32px;
@@ -229,6 +224,19 @@ section { padding: 80px 32px; }
 .pricing-cta:hover { opacity: 0.88; }
 .pricing-note { font-size: 0.72rem; color: var(--muted); text-align: center; margin-top: 10px; }
 
+/* ── Ligne durée événement ── */
+.pricing-duration-row {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.75rem; color: var(--text-2);
+  background: rgba(56,189,248,0.05);
+  border: 1px solid rgba(56,189,248,0.12);
+  border-radius: 7px;
+  padding: 6px 10px;
+  margin-bottom: 16px;
+}
+.pricing-duration-row .dur-icon { font-size: 0.85rem; }
+.pricing-duration-row strong { color: var(--text); }
+
 /* ── FAQ ── */
 .faq-list { margin-top: 44px; display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
 .faq-item { border-bottom: 1px solid var(--border); }
@@ -272,12 +280,14 @@ footer nav a:hover { color: var(--text); }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 860px) {
-  .hero { grid-template-columns: 1fr; gap: 40px; padding: 60px 20px 50px; }
-  .hero-visual { order: -1; }
+  .hero { padding: 60px 20px 50px; }
   .usecase-grid, .features-grid { grid-template-columns: 1fr; }
   .pricing-grid { grid-template-columns: 1fr 1fr; }
   .nav-links { display: none; }
   section { padding: 56px 20px; }
+}
+@media (max-width: 520px) {
+  .pricing-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -297,11 +307,9 @@ footer nav a:hover { color: var(--text); }
 
 <!-- HERO -->
 <div class="hero">
-  <!-- Canvas animation (même que index.html) -->
   <div class="hero-visual">
     <canvas id="convergence-canvas" width="300" height="170"></canvas>
   </div>
-
   <div class="hero-eyebrow">Suivi GPS temps réel</div>
   <h1>Suivez chaque pas,<br><em>ensemble.</em></h1>
   <p class="hero-sub">
@@ -374,7 +382,7 @@ footer nav a:hover { color: var(--text); }
       <div class="feature-item">
         <div class="feature-icon">⏪</div>
         <div class="feature-title">Replay accéléré</div>
-        <div class="feature-desc">Rejouez l'événement jusqu'à 60× avec interpolation. Exportable en vidéo avec branding.</div>
+        <div class="feature-desc">Rejouez l'événement jusqu'à 60× avec interpolation. Exportable en vidéo MP4 — watermark retiré à partir du plan Standard.</div>
       </div>
       <div class="feature-item">
         <div class="feature-icon">🗺️</div>
@@ -400,25 +408,29 @@ footer nav a:hover { color: var(--text); }
   <div class="section-inner">
     <div class="section-eyebrow">Tarifs</div>
     <h2 class="section-title">Simple. Transparent. Sans surprise.</h2>
-    <p class="section-sub">Commencez gratuitement. Passez à Pro ou Orga quand votre événement le demande.</p>
+    <p class="section-sub">Commencez gratuitement. Passez à Standard, Pro ou Organisation quand votre événement le demande.</p>
 
     <div class="pricing-grid">
 
-      <!-- FREE -->
+      <!-- FREEMIUM -->
       <div class="pricing-card">
         <div class="pricing-plan">Freemium</div>
         <div class="pricing-price">Gratuit<sub> pour toujours</sub></div>
-        <div class="pricing-tagline">1 événement test par mois, jusqu'à 10 participants. Pour découvrir sans engagement.</div>
+        <div class="pricing-tagline">Pour découvrir sans engagement. Jusqu'à 10 participants.</div>
+        <div class="pricing-duration-row">
+          <span class="dur-icon">⏱</span>
+          <span>Durée événement : <strong>2h max</strong></span>
+        </div>
         <hr class="pricing-divider">
         <ul class="pricing-features">
-          <li class="active"><span class="check">✓</span> 1 événement / mois</li>
           <li class="active"><span class="check">✓</span> 10 participants max</li>
           <li class="active"><span class="check">✓</span> Suivi GPS temps réel</li>
           <li class="active"><span class="check">✓</span> Replay dans l'app</li>
           <li class="active"><span class="check">✓</span> 5 fonds de carte</li>
-          <li><span class="cross">✗</span> Export vidéo</li>
+          <li class="active"><span class="check">✓</span> Accès données 7 jours</li>
+          <li><span class="cross">✗</span> Export vidéo MP4</li>
           <li><span class="cross">✗</span> Export GPX</li>
-          <li><span class="cross">✗</span> Branding retiré</li>
+          <li><span class="cross">✗</span> Suppression du branding</li>
         </ul>
         <a href="app.html" class="pricing-cta outline">Commencer gratuitement</a>
       </div>
@@ -427,16 +439,19 @@ footer nav a:hover { color: var(--text); }
       <div class="pricing-card">
         <div class="pricing-plan">Standard</div>
         <div class="pricing-price"><sup>€</sup>15<sub> / événement</sub></div>
-        <div class="pricing-tagline">Jusqu'à 50 participants. Idéal pour les groupes intermédiaires et les associations.</div>
+        <div class="pricing-tagline">Jusqu'à 50 participants. Idéal pour les associations et groupes intermédiaires.</div>
+        <div class="pricing-duration-row">
+          <span class="dur-icon">⏱</span>
+          <span>Durée événement : <strong>5h max</strong></span>
+        </div>
         <hr class="pricing-divider">
         <ul class="pricing-features">
           <li class="active"><span class="check">✓</span> Jusqu'à 50 participants</li>
           <li class="active"><span class="check">✓</span> Replay + export MP4</li>
-          <li class="active"><span class="check">✓</span> Export coordonnées GPX</li>
+          <li class="active"><span class="check">✓</span> Export GPX</li>
           <li class="active"><span class="check">✓</span> Branding retiré</li>
-          <li class="active"><span class="check">✓</span> Accès 7 jours post-événement</li>
-          <li><span class="cross">✗</span> Personnalisation (logo)</li>
-          <li><span class="cross">✗</span> Notifications arrivée</li>
+          <li class="active"><span class="check">✓</span> Accès données 2 semaines</li>
+          <li><span class="cross">✗</span> Durée illimitée</li>
           <li><span class="cross">✗</span> + 50 participants</li>
         </ul>
         <a href="mailto:aymeric.dedreuzy+convergence-map@gmail.com?subject=Licence Standard" class="pricing-cta outline">Obtenir une licence →</a>
@@ -449,15 +464,17 @@ footer nav a:hover { color: var(--text); }
         <div class="pricing-plan">Pro</div>
         <div class="pricing-price"><sup>€</sup>30<sub> / événement</sub></div>
         <div class="pricing-tagline">Participants illimités. Pour les pèlerinages, trails et séminaires de grande envergure.</div>
+        <div class="pricing-duration-row">
+          <span class="dur-icon">⏱</span>
+          <span>Durée événement : <strong>illimitée</strong></span>
+        </div>
         <hr class="pricing-divider">
         <ul class="pricing-features">
           <li class="active"><span class="check">✓</span> Participants illimités</li>
           <li class="active"><span class="check">✓</span> Replay + export MP4</li>
           <li class="active"><span class="check">✓</span> Export GPX</li>
           <li class="active"><span class="check">✓</span> Branding retiré</li>
-          <li class="active"><span class="check">✓</span> Personnalisation (logo, couleurs)</li>
-          <li class="active"><span class="check">✓</span> Notifications arrivée étape</li>
-          <li class="active"><span class="check">✓</span> Accès 30 jours post-événement</li>
+          <li class="active"><span class="check">✓</span> Accès données 1 mois</li>
           <li class="active"><span class="check">✓</span> Support prioritaire</li>
         </ul>
         <a href="mailto:aymeric.dedreuzy+convergence-map@gmail.com?subject=Licence Pro" class="pricing-cta sky">Obtenir une licence Pro →</a>
@@ -469,13 +486,17 @@ footer nav a:hover { color: var(--text); }
         <div class="pricing-plan">Organisation</div>
         <div class="pricing-price"><sup>€</sup>100<sub> / an</sub></div>
         <div class="pricing-tagline">Pour les structures qui organisent toute l'année. Tout inclus, sans compter.</div>
+        <div class="pricing-duration-row">
+          <span class="dur-icon">⏱</span>
+          <span>Durée événement : <strong>illimitée</strong></span>
+        </div>
         <hr class="pricing-divider">
         <ul class="pricing-features">
           <li class="active"><span class="check">✓</span> Événements illimités</li>
           <li class="active"><span class="check">✓</span> Participants illimités</li>
           <li class="active"><span class="check">✓</span> Tout le plan Pro inclus</li>
+          <li class="active"><span class="check">✓</span> Accès données 1 an</li>
           <li class="active"><span class="check">✓</span> Dashboard multi-événements</li>
-          <li class="active"><span class="check">✓</span> Archivage illimité</li>
           <li class="active"><span class="check">✓</span> Facture annuelle émise</li>
           <li class="active"><span class="check">✓</span> Accès anticipé nouveautés</li>
           <li class="active"><span class="check">✓</span> Support dédié</li>
@@ -513,10 +534,34 @@ footer nav a:hover { color: var(--text); }
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          Combien de temps les données sont-elles conservées ?
+          Combien de temps les données GPS sont-elles accessibles après l'événement ?
           <span class="arrow">▼</span>
         </button>
-        <div class="faq-a">En Freemium, les données sont conservées 72 heures après la fin de l'événement. En Pro, 30 jours. En Organisation, archivage illimité tant que l'abonnement est actif.</div>
+        <div class="faq-a">
+          La durée d'accès aux données dépend de votre plan :
+          <br><br>
+          <strong style="color:var(--text)">Freemium</strong> — 7 jours après l'événement.<br>
+          <strong style="color:var(--orange)">Standard</strong> — 2 semaines après l'événement.<br>
+          <strong style="color:var(--sky)">Pro</strong> — 1 mois après l'événement.<br>
+          <strong style="color:var(--purple)">Organisation</strong> — 1 an, tant que l'abonnement est actif.<br>
+          <br>
+          Passé ce délai, les données de positions et l'historique GPS sont automatiquement supprimés de nos serveurs.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Quelle est la durée maximale d'un événement selon le plan ?
+          <span class="arrow">▼</span>
+        </button>
+        <div class="faq-a">
+          La durée maximale d'un événement actif dépend de votre plan :<br><br>
+          <strong style="color:var(--text)">Freemium</strong> — 2 heures maximum.<br>
+          <strong style="color:var(--orange)">Standard</strong> — 5 heures maximum.<br>
+          <strong style="color:var(--sky)">Pro</strong> et <strong style="color:var(--purple)">Organisation</strong> — durée illimitée.<br>
+          <br>
+          Pour un pèlerinage sur plusieurs jours ou un trail long, le plan Pro est recommandé.
+        </div>
       </div>
 
       <div class="faq-item">
@@ -532,7 +577,7 @@ footer nav a:hover { color: var(--text); }
           Quelle différence entre Standard et Pro ?
           <span class="arrow">▼</span>
         </button>
-        <div class="faq-a">Le plan Standard (15 €/événement) couvre jusqu'à 50 participants — idéal pour une association, un groupe paroissial ou une sortie d'entreprise. Le plan Pro (30 €/événement) lève toute limite de participants et ajoute la personnalisation (logo, couleurs) et les notifications d'arrivée à chaque étape.</div>
+        <div class="faq-a">Le plan Standard (15 €/événement) couvre jusqu'à 50 participants avec une durée d'événement de 5h — idéal pour une association, un groupe paroissial ou une sortie d'entreprise. Le plan Pro (30 €/événement) lève toute limite de participants et de durée, avec un accès aux données d'un mois après l'événement.</div>
       </div>
 
       <div class="faq-item">
@@ -540,7 +585,19 @@ footer nav a:hover { color: var(--text); }
           Le plan Freemium est-il vraiment gratuit pour toujours ?
           <span class="arrow">▼</span>
         </button>
-        <div class="faq-a">Oui. Le Freemium reste gratuit sans limite de durée. Il est conçu pour tester l'outil avant un événement réel et pour les petits groupes (10 personnes max) qui n'ont pas besoin de fonctionnalités avancées. Quand votre groupe grandit, vous passez au plan adapté.</div>
+        <div class="faq-a">Oui. Le Freemium reste gratuit sans limite de durée. Il est conçu pour tester l'outil avant un événement réel et pour les petits groupes (10 personnes max) qui n'ont pas besoin de fonctionnalités avancées. Quand votre groupe grandit ou que votre événement dure plus de 2h, vous passez au plan adapté.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Quelles données personnelles sont collectées ? RGPD ?
+          <span class="arrow">▼</span>
+        </button>
+        <div class="faq-a">
+          Convergence Map collecte uniquement les données strictement nécessaires au fonctionnement du suivi : le pseudo saisi librement par le participant, le nom d'équipe (facultatif), et les coordonnées GPS horodatées pendant l'événement.<br><br>
+          Aucune donnée d'identification (nom, email, téléphone) n'est demandée aux participants. L'organisateur se connecte via Google Auth, dont les données sont gérées par Google.<br><br>
+          Conformément au RGPD, vous pouvez demander la suppression de toutes les données liées à votre événement à tout moment en écrivant à <a href="mailto:aymeric.dedreuzy+convergence-map@gmail.com" style="color:var(--sky)">notre contact</a>. Nous nous engageons à les supprimer sous 72h. Les données sont de toute façon automatiquement supprimées à l'expiration de la période d'accès propre à votre plan.
+        </div>
       </div>
 
     </div>
@@ -582,7 +639,6 @@ function toggleFaq(btn) {
   }
 }
 
-// Scroll reveal léger
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) {
@@ -599,8 +655,8 @@ document.querySelectorAll('.usecase-card, .feature-item, .pricing-card').forEach
   observer.observe(el);
 });
 </script>
+
 <script>
-// ── Animation convergence (identique à index.html) ──
 (function() {
   const canvas = document.getElementById('convergence-canvas');
   const ctx = canvas.getContext('2d');
@@ -622,13 +678,10 @@ document.querySelectorAll('.usecase-card, .feature-item, .pricing-card').forEach
     };
   });
 
-  function easeInOut(t) {
-    return t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
-  }
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
-
     const grd = ctx.createRadialGradient(CX, CY, 0, CX, CY, 22);
     grd.addColorStop(0, 'rgba(56,189,248,0.25)');
     grd.addColorStop(1, 'rgba(56,189,248,0)');
@@ -636,7 +689,6 @@ document.querySelectorAll('.usecase-card, .feature-item, .pricing-card').forEach
     ctx.beginPath();
     ctx.arc(CX, CY, 22, 0, Math.PI * 2);
     ctx.fill();
-
     ctx.beginPath();
     ctx.arc(CX, CY, 5, 0, Math.PI * 2);
     ctx.fillStyle = '#38bdf8';
@@ -645,14 +697,11 @@ document.querySelectorAll('.usecase-card, .feature-item, .pricing-card').forEach
     dots.forEach(dot => {
       dot.t += dot.speed;
       if (dot.t > 1) dot.t = 0;
-
       const progress = easeInOut(dot.t);
       const x = dot.startX + (CX - dot.startX) * progress;
       const y = dot.startY + (CY - dot.startY) * progress;
-
       dot.trail.push({ x, y });
       if (dot.trail.length > 24) dot.trail.shift();
-
       dot.trail.forEach((pt, i) => {
         const alpha = (i / dot.trail.length) * (1 - progress) * 0.5;
         ctx.globalAlpha = alpha;
@@ -662,7 +711,6 @@ document.querySelectorAll('.usecase-card, .feature-item, .pricing-card').forEach
         ctx.fill();
         ctx.globalAlpha = 1;
       });
-
       ctx.beginPath();
       ctx.arc(x, y, 4.5, 0, Math.PI * 2);
       ctx.fillStyle = dot.color;
@@ -671,7 +719,6 @@ document.querySelectorAll('.usecase-card, .feature-item, .pricing-card').forEach
       ctx.fill();
       ctx.shadowBlur = 0;
     });
-
     requestAnimationFrame(draw);
   }
 
