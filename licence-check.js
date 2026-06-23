@@ -11,48 +11,52 @@
 // ── Limites par plan ──────────────────────────────────────────────────────────
 export const PLANS = {
   freemium: {
-    label:           'Freemium',
-    maxParticipants: 10,
-    replay:          true,   // replay dans l'app OK
-    exportVideo:     false,  // export MP4 bloqué
-    exportGpx:       false,
-    branding:        true,   // watermark forcé
-    customLogo:      false,
-    notifications:   false,
-    historyDays:     3,
+    label:            'Freemium',
+    maxParticipants:  10,
+    maxEventDuration: 2,          // heures max par événement
+    historyDays:      3,          // jours de consultation de l'historique
+    replay:           true,
+    exportVideo:      false,
+    exportGpx:        false,
+    branding:         true,       // watermark forcé
+    customLogo:       false,
+    notifications:    false,
   },
   standard: {
-    label:           'Standard',
-    maxParticipants: 50,
-    replay:          true,
-    exportVideo:     true,
-    exportGpx:       true,
-    branding:        false,  // watermark retiré
-    customLogo:      false,
-    notifications:   false,
-    historyDays:     7,
+    label:            'Standard',
+    maxParticipants:  50,
+    maxEventDuration: 5,          // heures max par événement
+    historyDays:      30,         // 1 mois de consultation
+    replay:           true,
+    exportVideo:      true,
+    exportGpx:        true,
+    branding:         false,      // watermark retiré
+    customLogo:       false,
+    notifications:    false,
   },
   pro: {
-    label:           'Pro',
-    maxParticipants: Infinity,
-    replay:          true,
-    exportVideo:     true,
-    exportGpx:       true,
-    branding:        false,
-    customLogo:      true,
-    notifications:   true,
-    historyDays:     30,
+    label:            'Pro',
+    maxParticipants:  Infinity,
+    maxEventDuration: Infinity,   // durée illimitée
+    historyDays:      180,        // 6 mois de consultation
+    replay:           true,
+    exportVideo:      true,
+    exportGpx:        true,
+    branding:         false,
+    customLogo:       true,
+    notifications:    true,
   },
   orga: {
-    label:           'Organisation',
-    maxParticipants: Infinity,
-    replay:          true,
-    exportVideo:     true,
-    exportGpx:       true,
-    branding:        false,
-    customLogo:      true,
-    notifications:   true,
-    historyDays:     Infinity,
+    label:            'Organisation',
+    maxParticipants:  Infinity,
+    maxEventDuration: Infinity,
+    historyDays:      Infinity,
+    replay:           true,
+    exportVideo:      true,
+    exportGpx:        true,
+    branding:         false,
+    customLogo:       true,
+    notifications:    true,
   },
 };
 
@@ -60,7 +64,7 @@ export const PLANS = {
 /**
  * @param {Database} db       — instance Firebase Realtime Database
  * @param {object}   context  — { code?: string, uid?: string }
- * @returns {object}  { plan, limits, expiresAt, source }
+ * @returns {object}  { plan, limits, expiresAt, source, expired }
  *   plan    : 'freemium' | 'standard' | 'pro' | 'orga'
  *   limits  : objet PLANS[plan]
  *   source  : 'event' | 'user' | 'default'
@@ -108,14 +112,14 @@ export async function getLicence(db, { code, uid } = {}) {
         }
         // Licence expirée → retombe sur freemium
         if (expired) {
-          return { plan:'freemium', limits:PLANS.freemium, source:'event', expired:true };
+          return { plan: 'freemium', limits: PLANS.freemium, source: 'event', expired: true };
         }
       }
     } catch (e) { /* pas de licence event */ }
   }
 
   // 3. Par défaut → Freemium
-  return { plan:'freemium', limits:PLANS.freemium, source:'default', expired:false };
+  return { plan: 'freemium', limits: PLANS.freemium, source: 'default', expired: false };
 }
 
 // ── Helper : affiche un badge plan dans la topbar ─────────────────────────────
