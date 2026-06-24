@@ -169,7 +169,9 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
       </div>
       <div class="end-actions">
         <button class="btn btn-blue" id="end-btn-restart">↩ Rejouer</button>
-        <button class="btn btn-purple" id="end-btn-export">⬇ Exporter MP4</button>
+        <button class="btn btn-purple" id="end-btn-export">⬇ MP4</button>
+        <button class="btn btn-green" id="end-btn-gpx">⬇ GPX</button>
+        <button class="btn btn-orange" id="end-btn-csv">⬇ CSV</button>
         <button class="btn btn-gray" id="end-btn-close">✕ Fermer</button>
       </div>
       <div class="end-branding">
@@ -272,6 +274,8 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
     <option value="60">60x</option>
   </select>
   <button class="btn btn-purple" style="padding:4px 9px;font-size:0.73rem" id="btn-record" title="Exporter MP4">⏺ MP4</button>
+  <button class="btn btn-green" style="padding:4px 9px;font-size:0.73rem" id="btn-export-gpx" title="Exporter GPX">⬇ GPX</button>
+  <button class="btn btn-orange" style="padding:4px 9px;font-size:0.73rem" id="btn-export-csv" title="Exporter CSV">⬇ CSV</button>
   <button class="btn btn-gray" style="padding:4px 9px;font-size:0.73rem" id="replay-stop-btn">✕</button>
 </div>
 
@@ -949,6 +953,96 @@ document.getElementById('btn-record').addEventListener('click', ()=>{
   }
   startVideoExport();
 });
+
+// ── Export GPX global ──────────────────────────────────────────────────────────
+function exportGpx() {
+  if (!currentLicence.limits.exportGpx) {
+    return alert(`⬆️ Export GPX disponible à partir du plan Standard (15 €/événement).`);
+  }
+  if (!Object.keys(replayRawPoints).length) {
+    return alert('Lance un replay d\'abord pour charger les données.');
+  }
+
+  const eventName = currentEventName || currentEventCode || 'convergence';
+  const now = new Date().toISOString();
+
+  let gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Convergence Map" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>${eventName}</name>
+    <time>${now}</time>
+  </metadata>
+`;
+
+  Object.entries(replayRawPoints).forEach(([pid, points]) => {
+    if (!points.length) return;
+    const pseudo = points[0].pseudo || pid;
+    const team   = points[0].team  || '';
+    const trkName = team ? `${pseudo} · ${team}` : pseudo;
+
+    gpx += `  <trk>\n    <name>${trkName}</name>\n    <trkseg>\n`;
+    points.forEach(pt => {
+      const dt = new Date(pt.ts).toISOString();
+      gpx += `      <trkpt lat="${pt.lat.toFixed(7)}" lon="${pt.lng.toFixed(7)}">\n`;
+      gpx += `        <time>${dt}</time>\n`;
+      gpx += `      </trkpt>\n`;
+    });
+    gpx += `    </trkseg>\n  </trk>\n`;
+  });
+
+  gpx += `</gpx>`;
+
+  const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `${currentEventCode || 'convergence'}-traces.gpx`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Export CSV global ──────────────────────────────────────────────────────────
+function exportCsv() {
+  if (!currentLicence.limits.exportGpx) {
+    return alert(`⬆️ Export CSV disponible à partir du plan Standard (15 €/événement).`);
+  }
+  if (!Object.keys(replayRawPoints).length) {
+    return alert('Lance un replay d\'abord pour charger les données.');
+  }
+
+  const rows = [['participant', 'equipe', 'lat', 'lng', 'timestamp_ms', 'datetime']];
+
+  Object.entries(replayRawPoints).forEach(([pid, points]) => {
+    points.forEach(pt => {
+      const pseudo  = pt.pseudo || pid;
+      const team    = pt.team   || '';
+      const dt      = new Date(pt.ts).toLocaleString('fr-FR');
+      rows.push([
+        `"${pseudo}"`,
+        `"${team}"`,
+        pt.lat.toFixed(7),
+        pt.lng.toFixed(7),
+        pt.ts,
+        `"${dt}"`
+      ]);
+    });
+  });
+
+  const csv  = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `${currentEventCode || 'convergence'}-traces.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Listeners export GPX / CSV ─────────────────────────────────────────────────
+document.getElementById('end-btn-gpx').addEventListener('click', exportGpx);
+document.getElementById('end-btn-csv').addEventListener('click', exportCsv);
+document.getElementById('btn-export-gpx').addEventListener('click', exportGpx);
+document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
 
 // ── Export vidéo MP4 via canvas overlay ──
 async function startVideoExport() {
