@@ -73,16 +73,36 @@ export async function getLicence(db, { code, uid } = {}) {
 
   if (code) {
     try {
-      const snap = await get(ref(db, `licences/events/${code}`));
-      if (snap.exists()) {
-        const data = snap.val();
+      // Lire en parallèle la licence et l'event (pour override maxParticipants)
+      const [licSnap, evtSnap] = await Promise.all([
+        get(ref(db, `licences/events/${code}`)),
+        get(ref(db, `events/${code}`))
+      ]);
+
+      // Override maxParticipants si défini sur l'event
+      const evtData = evtSnap.exists() ? evtSnap.val() : null;
+      const customMax = evtData?.maxParticipants != null ? evtData.maxParticipants : null;
+
+      if (licSnap.exists()) {
+        const data = licSnap.val();
         const expired = data.expiresAt && data.expiresAt < now;
         if (!expired && PLANS[data.plan]) {
-          return { plan: data.plan, limits: PLANS[data.plan], expiresAt: data.expiresAt || null, source: 'event', expired: false };
+          const limits = customMax != null
+            ? { ...PLANS[data.plan], maxParticipants: customMax }
+            : PLANS[data.plan];
+          return { plan: data.plan, limits, expiresAt: data.expiresAt || null, source: 'event', expired: false };
         }
         if (expired) {
-          return { plan: 'freemium', limits: PLANS.freemium, source: 'event', expired: true };
+          const limits = customMax != null
+            ? { ...PLANS.freemium, maxParticipants: customMax }
+            : PLANS.freemium;
+          return { plan: 'freemium', limits, source: 'event', expired: true };
         }
+      }
+
+      // Pas de licence — Freemium implicite avec override éventuel
+      if (customMax != null) {
+        return { plan: 'freemium', limits: { ...PLANS.freemium, maxParticipants: customMax }, source: 'default', expired: false };
       }
     } catch (e) {}
   }
