@@ -39,7 +39,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 
 #main { flex:1; display:none; }
 #main.visible { display:flex; flex-direction:column; }
-
 #content { flex:1; padding:24px 20px; max-width:960px; width:100%; margin:0 auto; }
 
 .stats-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:24px; }
@@ -111,13 +110,16 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 <body>
 
 <div id="topbar">
-  <h1>🗺️ Convergence Map</h1>
+  <!-- ── Lien vers la page d'accueil sur le logo ── -->
+  <a href="index.html" style="text-decoration:none"><h1>🗺️ Convergence Map</h1></a>
   <div id="topbar-right" style="display:none">
     <div class="user-chip" id="user-chip">
       <div class="user-avatar-placeholder" id="user-initial">?</div>
       <span id="user-name">…</span>
     </div>
     <a href="app.html" class="btn btn-ghost btn-sm">← Carte</a>
+    <!-- ── Bouton admin discret — affiché uniquement pour les UIDs autorisés ── -->
+    <a href="admin.html" id="btn-admin" class="btn btn-sm" style="display:none;background:rgba(255,255,255,0.04);color:#334155;border:1px solid #1e293b;font-size:0.68rem;" title="Admin">⚙</a>
     <button class="btn btn-gray btn-sm" id="btn-logout">Déconnexion</button>
   </div>
 </div>
@@ -213,6 +215,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getDatabase, ref, set, get, remove, update, onValue, off } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+// ── UIDs autorisés à accéder à la console admin ──────────────────────────────
+const ADMIN_UIDS = [
+  'NdEdkroZSVPZKnvoqtxRQqQGsAI3', // aymeric.dedreuzy@gmail.com
+];
+
 const firebaseConfig = {
   apiKey: "AIzaSyBAU9uBrrbbMbW2mvNobcxvbss1AgrhmIk",
   authDomain: "maps-convergence.firebaseapp.com",
@@ -230,7 +237,6 @@ const provider = new GoogleAuthProvider();
 
 const COLORS = ['#ef4444','#3b82f6','#22c55e','#f97316','#a855f7','#eab308','#06b6d4','#ec4899'];
 
-// ── Toast ──
 function toast(msg, type='') {
   const el = document.getElementById('toast');
   el.textContent = msg; el.className = 'show ' + type;
@@ -238,7 +244,6 @@ function toast(msg, type='') {
   el._t = setTimeout(() => el.className = '', 3000);
 }
 
-// ── Confirm ──
 function confirmDialog(text) {
   return new Promise(resolve => {
     document.getElementById('confirm-text').textContent = text;
@@ -249,7 +254,6 @@ function confirmDialog(text) {
   });
 }
 
-// ── Auth — signInWithRedirect (compatible GitHub Pages / COOP) ──
 let currentUser = null;
 let eventsUnsub = null;
 
@@ -258,8 +262,6 @@ document.getElementById('btn-google-login').addEventListener('click', async () =
     await signInWithPopup(auth, provider);
   } catch(e) {
     toast('Erreur de connexion : ' + e.message, 'error');
-    document.getElementById('auth-loading').style.display = 'none';
-    document.getElementById('btn-google-login').style.display = 'flex';
   }
 });
 
@@ -281,6 +283,10 @@ onAuthStateChanged(auth, user => {
       document.getElementById('user-initial').outerHTML =
         `<img class="user-avatar" id="user-initial" src="${user.photoURL}" alt="${initial}"/>`;
     }
+    // ── Afficher le bouton admin uniquement si UID autorisé ──
+    if (ADMIN_UIDS.includes(user.uid)) {
+      document.getElementById('btn-admin').style.display = 'inline-flex';
+    }
     loadEvents(user.uid);
   } else {
     document.getElementById('auth-screen').style.display = 'flex';
@@ -290,7 +296,6 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-// ── Load events ──
 function formatDate(ts) { return new Date(ts).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' }); }
 function formatTime(ts) { return new Date(ts).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }); }
 function eventStatus(ev) {
@@ -424,7 +429,6 @@ document.getElementById('stats-modal-close').addEventListener('click',()=>{
   document.getElementById('stats-modal-overlay').style.display='none';
 });
 
-// ── Create event ──
 let editingCode=null, wpCount=0;
 
 document.getElementById('btn-new-event').addEventListener('click',()=>{
