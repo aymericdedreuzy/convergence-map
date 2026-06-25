@@ -502,17 +502,23 @@ function renderDashboard() {
   const expired = all.filter(([,l]) => l.expiresAt <= now);
   const liveEvt = Object.values(EVTS).filter(e => e.active).length;
 
-  document.getElementById('kpi-total').textContent   = all.length;
+  // Freemium implicites = events sans licence
+  const freemiumImplicites = Object.keys(EVTS).filter(code => !LICS[code]).length;
+
+  document.getElementById('kpi-total').textContent   = all.length + freemiumImplicites;
   document.getElementById('kpi-active').textContent  = active.length;
   document.getElementById('kpi-expired').textContent = expired.length;
   document.getElementById('kpi-events').textContent  = liveEvt;
 
+  // Plan breakdown — inclut les Freemium implicites
   const plans = {};
   all.forEach(([,l]) => { plans[l.plan] = (plans[l.plan]||0)+1; });
+  if (freemiumImplicites > 0) plans['freemium'] = (plans['freemium']||0) + freemiumImplicites;
   document.getElementById('plan-breakdown').innerHTML = Object.entries(plans).length
     ? Object.entries(plans).map(([p,n]) =>
         `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);">
-          <span class="badge badge-${p}">${p}</span><span style="font-weight:600">${n}</span>
+          <span class="badge badge-${p}">${p}</span>
+          <span style="font-weight:600">${n}${p==='freemium'&&freemiumImplicites>0?' <span style=\'font-size:10px;color:var(--muted)\'>(' + freemiumImplicites + ' implicites)</span>':''}</span>
         </div>`).join('')
     : '<div style="color:var(--muted);font-size:13px;">Aucune donnée</div>';
 
@@ -591,9 +597,12 @@ function renderEvents() {
     const live = e.active;
     const hasLic = !!LICS[code];
     const lic = LICS[code];
+    // Option B : Freemium implicite si pas de licence (badge grisé + bouton upgrade)
+    const effectivePlan = hasLic ? lic.plan : 'freemium';
+    const isImplicit = !hasLic;
     const licBadge = hasLic
       ? `<span class="badge badge-${lic.plan}">${lic.plan}</span>`
-      : `<span class="badge" style="background:rgba(218,54,51,.15);color:var(--danger)">Pas de licence</span>`;
+      : `<span class="badge badge-freemium" style="opacity:0.55" title="Freemium implicite — aucune licence activée">freemium</span>`;
     const endsStr = e.endsAt ? new Date(e.endsAt).toLocaleDateString('fr-FR') : '—';
     return `<div class="event-card ${live?'':'ev-inactive'}">
       <div class="ev-code">${code} ${live?'🟢':'⚫'}</div>
