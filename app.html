@@ -811,22 +811,29 @@ document.getElementById('btn-stop').addEventListener('click', ()=>{
 function interpolateTrack(points) {
   if (points.length < 2) return points;
   const result = [];
+
   for (let i = 0; i < points.length - 1; i++) {
-    const a = points[i], b = points[i+1];
-    const dt = b.ts - a.ts;
-    const steps = Math.max(2, Math.round(dt / (dt / 20)));
+    const a = points[i], b = points[i + 1];
+    const dt = b.ts - a.ts; // ms entre les deux points
+
+    // 1 point par minute si gap ≥ 20s, sinon 20 interpolations fixes (mouvement fluide)
+    const steps = dt >= 20000
+      ? Math.max(2, Math.round(dt / 60000))  // 1 pt/min — vitesse réaliste sur longue perte
+      : 20;                                   // 20 pts fixes — fluide sur courte distance
+
     for (let s = 0; s < steps; s++) {
       const t = s / steps;
       result.push({
-        lat: a.lat + (b.lat - a.lat) * t,
-        lng: a.lng + (b.lng - a.lng) * t,
-        ts: Math.round(a.ts + dt * t),
-        pseudo: a.pseudo,
-        team: a.team || '',
+        lat:          a.lat + (b.lat - a.lat) * t,
+        lng:          a.lng + (b.lng - a.lng) * t,
+        ts:           Math.round(a.ts + dt * t),
+        pseudo:       a.pseudo,
+        team:         a.team || '',
         interpolated: true
       });
     }
   }
+
   result.push(points[points.length - 1]);
   return result;
 }
