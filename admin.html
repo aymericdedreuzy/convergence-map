@@ -326,6 +326,41 @@
   </div>
 </div>
 
+<!-- EDIT EVENT MODAL -->
+<div class="overlay" id="edit-event-modal">
+  <div class="modal">
+    <h3>Modifier l'événement</h3>
+    <input type="hidden" id="ee-code">
+    <div class="field-row">
+      <label>Code événement</label>
+      <input id="ee-code-disp" type="text" disabled style="opacity:.5;cursor:not-allowed;">
+    </div>
+    <div class="field-row">
+      <label>Nom de l'événement</label>
+      <input id="ee-name" type="text" placeholder="Nom de l'événement">
+    </div>
+    <div class="grid2">
+      <div class="field-row">
+        <label>Date de fin</label>
+        <input id="ee-endsAt-date" type="date">
+      </div>
+      <div class="field-row">
+        <label>Heure de fin</label>
+        <input id="ee-endsAt-time" type="time">
+      </div>
+    </div>
+    <div class="field-row">
+      <label>Limite participants (override plan)</label>
+      <input id="ee-maxParticipants" type="number" min="1" placeholder="Laisser vide = limite du plan">
+      <div class="hint">Override la limite du plan. Vide = retour aux limites normales.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEventModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveEvent()">Sauvegarder →</button>
+    </div>
+  </div>
+</div>
+
 <!-- EDIT MODAL -->
 <div class="overlay" id="edit-modal">
   <div class="modal">
@@ -608,9 +643,10 @@ function renderEvents() {
       <div class="ev-code">${code} ${live?'🟢':'⚫'}</div>
       <div class="ev-name">${e.name||'—'}</div>
       <div class="ev-meta"><span>Fin : ${endsStr}</span>${e.ownerUid?`<span title="${e.ownerUid}">👤 Owner</span>`:''}</div>
-      <div style="display:flex;align-items:center;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;">
         ${licBadge}
         ${!hasLic?`<button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;" onclick="prefillCreate('${code}')">+ Licence</button>`:''}
+        <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;" onclick="openEditEvent('${code}')">✏️ Éditer</button>
       </div>
     </div>`;
   }).join('');
@@ -649,6 +685,66 @@ window.openEdit = function(code) {
   document.getElementById('edit-exp').value       = l.expiresAt ? new Date(l.expiresAt).toISOString().split('T')[0] : '';
   document.getElementById('edit-by').value        = l.activatedBy || 'admin';
   document.getElementById('edit-modal').classList.add('open');
+};
+
+// ── Edit event ───────────────────────────────────────────────────────────────
+window.openEditEvent = function(code) {
+  const e = EVTS[code]; if (!e) return;
+  document.getElementById('ee-code').value      = code;
+  document.getElementById('ee-code-disp').value = code;
+  document.getElementById('ee-name').value      = e.name || '';
+  if (e.endsAt) {
+    const d = new Date(e.endsAt);
+    document.getElementById('ee-endsAt-date').value = d.toISOString().split('T')[0];
+    document.getElementById('ee-endsAt-time').value = d.toTimeString().slice(0,5);
+  } else {
+    document.getElementById('ee-endsAt-date').value = '';
+    document.getElementById('ee-endsAt-time').value = '';
+  }
+  document.getElementById('ee-maxParticipants').value = e.maxParticipants != null ? e.maxParticipants : '';
+  document.getElementById('edit-event-modal').classList.add('open');
+};
+
+window.closeEventModal = function() {
+  document.getElementById('edit-event-modal').classList.remove('open');
+};
+
+window.saveEvent = async function() {
+  const code  = document.getElementById('ee-code').value;
+  const name  = document.getElementById('ee-name').value.trim();
+  const date  = document.getElementById('ee-endsAt-date').value;
+  const time  = document.getElementById('ee-endsAt-time').value || '23:59';
+  const maxP  = document.getElementById('ee-maxParticipants').value;
+
+  if (!name) { toast('Nom obligatoire'); return; }
+  if (!date)  { toast('Date de fin obligatoire'); return; }
+
+  const endsAt = new Date(`${date}T${time}`).getTime();
+  const updates = { name, endsAt };
+
+  // maxParticipants : vide = on supprime le champ (retour aux limites du plan)
+  if (maxP !== '' && !isNaN(parseInt(maxP))) {
+    updates.maxParticipants = parseInt(maxP);
+  } else {
+    updates.maxParticipants = null; // sera supprimé par Firebase si null
+  }
+
+  // Nettoyer null avant envoi REST
+  const payload = { ...EVTS[code], ...updates };
+  if (payload.maxParticipants === null) delete payload.maxParticipants;
+
+  try {
+    await fbPut(`events/${code}`, payload);
+    EVTS[code] = payload;
+    closeEventModal();
+    renderEvents();
+    renderDashboard();
+    log(`✎ Event modifié : ${code} → ${name}, fin ${date} ${time}${maxP ? ', max ' + maxP + ' participants' : ''}`, 'ok');
+    toast(`${code} mis à jour ✓`);
+  } catch(e) {
+    log(`✗ Modification event ${code} : ${e.message}`, 'err');
+    toast(`Erreur : ${e.message}`);
+  }
 };
 
 window.closeModal = function() {
