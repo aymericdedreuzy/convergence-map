@@ -35,7 +35,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 .auth-card p { font-size:0.82rem; color:#64748b; margin-bottom:28px; line-height:1.6; }
 .btn-google { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:11px 20px; background:white; color:#1e293b; border:none; border-radius:8px; font-size:0.9rem; font-weight:600; cursor:pointer; transition:opacity 0.2s; }
 .btn-google:hover { opacity:0.9; }
-.auth-loading { font-size:0.82rem; color:#64748b; margin-top:14px; display:none; }
 
 #main { flex:1; display:none; }
 #main.visible { display:flex; flex-direction:column; }
@@ -74,7 +73,7 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 
 #modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:500; display:none; align-items:center; justify-content:center; padding:20px; }
 #modal-overlay.open { display:flex; }
-.modal { background:#1e293b; border:1px solid #334155; border-radius:14px; padding:24px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+.modal { background:#1e293b; border:1px solid #334155; border-radius:14px; padding:24px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
 .modal h2 { font-size:1rem; font-weight:700; margin-bottom:18px; color:#e2e8f0; }
 .modal label { font-size:0.78rem; color:#94a3b8; display:block; margin-bottom:3px; }
 .modal input, .modal select { width:100%; padding:8px 10px; border-radius:6px; border:1px solid #334155; background:#0f172a; color:#e2e8f0; font-size:0.82rem; margin-bottom:10px; outline:none; }
@@ -83,6 +82,18 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 .coord-row { display:flex; gap:6px; }
 .coord-row input { flex:1; }
 .modal-footer { display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+
+/* ── Observers ── */
+.observer-list { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
+.observer-row { display:flex; align-items:center; gap:8px; background:#0f172a; border:1px solid #334155; border-radius:6px; padding:6px 10px; font-size:0.78rem; font-family:monospace; color:#94a3b8; }
+.observer-row .obs-uid { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.observer-add-row { display:flex; gap:6px; }
+.observer-add-row input { flex:1; margin-bottom:0; }
+
+/* ── UID chip dans topbar ── */
+.uid-chip { display:flex; align-items:center; gap:6px; background:#0f172a; border:1px solid #334155; border-radius:6px; padding:3px 8px; font-size:0.65rem; font-family:monospace; color:#64748b; cursor:pointer; transition:border-color 0.2s; }
+.uid-chip:hover { border-color:#38bdf8; color:#38bdf8; }
+.uid-chip .uid-label { font-family:system-ui; font-size:0.62rem; color:#475569; }
 
 .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
 .stat-box { background:#0f172a; border:1px solid #334155; border-radius:8px; padding:12px; }
@@ -110,15 +121,18 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
 <body>
 
 <div id="topbar">
-  <!-- ── Lien vers la page d'accueil sur le logo ── -->
   <a href="index.html" style="text-decoration:none"><h1>🗺️ Convergence Map</h1></a>
   <div id="topbar-right" style="display:none">
     <div class="user-chip" id="user-chip">
       <div class="user-avatar-placeholder" id="user-initial">?</div>
       <span id="user-name">…</span>
     </div>
+    <!-- ── Mon UID — pour le copier-coller vers un owner ── -->
+    <div class="uid-chip" id="uid-chip" title="Cliquer pour copier mon UID Firebase" onclick="copyMyUid()">
+      <span class="uid-label">Mon UID</span>
+      <span id="my-uid-display">…</span>
+    </div>
     <a href="app.html" class="btn btn-ghost btn-sm">← Carte</a>
-    <!-- ── Bouton admin discret — affiché uniquement pour les UIDs autorisés ── -->
     <a href="admin.html" id="btn-admin" class="btn btn-sm" style="display:none;background:rgba(255,255,255,0.04);color:#334155;border:1px solid #1e293b;font-size:0.68rem;" title="Admin">⚙</a>
     <button class="btn btn-gray btn-sm" id="btn-logout">Déconnexion</button>
   </div>
@@ -133,7 +147,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
       <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
       Continuer avec Google
     </button>
-    <div class="auth-loading" id="auth-loading">Connexion en cours…</div>
   </div>
 </div>
 
@@ -152,7 +165,7 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
   </div>
 </div>
 
-<!-- Create modal -->
+<!-- Create / Edit modal -->
 <div id="modal-overlay">
   <div class="modal">
     <h2 id="modal-title">Créer un événement</h2>
@@ -162,6 +175,7 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
     <input id="f-code" placeholder="ex: PELE2025" style="text-transform:uppercase"/>
     <label>Durée (heures)</label>
     <input id="f-duration" type="number" value="8" min="1" max="72"/>
+
     <div class="section-title">Départ (facultatif)</div>
     <label>Nom du lieu</label>
     <input id="f-start-label" placeholder="ex: Cathédrale de Tours"/>
@@ -169,6 +183,7 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
       <input id="f-start-lat" placeholder="Latitude"/>
       <input id="f-start-lng" placeholder="Longitude"/>
     </div>
+
     <div class="section-title">Arrivée (facultatif)</div>
     <label>Nom du lieu</label>
     <input id="f-end-label" placeholder="ex: Sanctuaire de Lourdes"/>
@@ -176,9 +191,23 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; min-
       <input id="f-end-lat" placeholder="Latitude"/>
       <input id="f-end-lng" placeholder="Longitude"/>
     </div>
+
     <div class="section-title">Étapes (max 5, facultatif)</div>
     <div id="f-waypoints"></div>
     <button class="btn btn-gray btn-sm" id="f-btn-add-wp" style="margin-bottom:10px">+ Ajouter une étape</button>
+
+    <!-- ── Observateurs autorisés ── -->
+    <div class="section-title">Observateurs autorisés</div>
+    <p style="font-size:0.75rem;color:#64748b;margin-bottom:8px;line-height:1.5">
+      Seuls le créateur et les UIDs listés ici pourront observer cet événement en direct.<br>
+      Chaque observateur trouve son UID dans son propre dashboard (topbar « Mon UID »).
+    </p>
+    <div class="observer-list" id="f-observers-list"></div>
+    <div class="observer-add-row">
+      <input id="f-observer-input" placeholder="UID Firebase de l'observateur" style="font-family:monospace;font-size:0.75rem"/>
+      <button class="btn btn-gray btn-sm" id="f-btn-add-obs">+ Ajouter</button>
+    </div>
+
     <div class="modal-footer">
       <button class="btn btn-ghost" id="modal-cancel">Annuler</button>
       <button class="btn btn-green" id="modal-save">Créer</button>
@@ -215,10 +244,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getDatabase, ref, set, get, remove, update, onValue, off } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// ── UIDs autorisés à accéder à la console admin ──────────────────────────────
-const ADMIN_UIDS = [
-  'NdEdkroZSVPZKnvoqtxRQqQGsAI3', // aymeric.dedreuzy@gmail.com
-];
+const ADMIN_UIDS = ['NdEdkroZSVPZKnvoqtxRQqQGsAI3'];
 
 const firebaseConfig = {
   apiKey: "AIzaSyBAU9uBrrbbMbW2mvNobcxvbss1AgrhmIk",
@@ -237,6 +263,9 @@ const provider = new GoogleAuthProvider();
 
 const COLORS = ['#ef4444','#3b82f6','#22c55e','#f97316','#a855f7','#eab308','#06b6d4','#ec4899'];
 
+// ── Observers locaux (pendant édition modal) ──
+let localObservers = []; // tableau d'UIDs
+
 function toast(msg, type='') {
   const el = document.getElementById('toast');
   el.textContent = msg; el.className = 'show ' + type;
@@ -254,15 +283,19 @@ function confirmDialog(text) {
   });
 }
 
+// ── Copier mon UID ──
+window.copyMyUid = function() {
+  const uid = document.getElementById('my-uid-display').textContent;
+  if (!uid || uid === '…') return;
+  navigator.clipboard.writeText(uid).then(() => toast('✅ UID copié !', 'success'));
+};
+
 let currentUser = null;
 let eventsUnsub = null;
 
 document.getElementById('btn-google-login').addEventListener('click', async () => {
-  try {
-    await signInWithPopup(auth, provider);
-  } catch(e) {
-    toast('Erreur de connexion : ' + e.message, 'error');
-  }
+  try { await signInWithPopup(auth, provider); }
+  catch(e) { toast('Erreur de connexion : ' + e.message, 'error'); }
 });
 
 document.getElementById('btn-logout').addEventListener('click', async () => {
@@ -283,7 +316,10 @@ onAuthStateChanged(auth, user => {
       document.getElementById('user-initial').outerHTML =
         `<img class="user-avatar" id="user-initial" src="${user.photoURL}" alt="${initial}"/>`;
     }
-    // ── Afficher le bouton admin uniquement si UID autorisé ──
+    // Afficher l'UID tronqué dans la topbar
+    document.getElementById('my-uid-display').textContent = user.uid.slice(0, 8) + '…';
+    document.getElementById('uid-chip').title = `Mon UID complet : ${user.uid} — Cliquer pour copier`;
+
     if (ADMIN_UIDS.includes(user.uid)) {
       document.getElementById('btn-admin').style.display = 'inline-flex';
     }
@@ -340,12 +376,17 @@ function renderEvents(entries) {
     const status = eventStatus(ev);
     const created = ev.createdAt ? `Créé le ${formatDate(ev.createdAt)}` : '';
     const ends = ev.endsAt && status === 'active' ? `Se termine le ${formatDate(ev.endsAt)} à ${formatTime(ev.endsAt)}` : '';
+    const obsCount = ev.observers ? Object.keys(ev.observers).length : 0;
+    const obsBadge = obsCount > 0
+      ? `<span style="font-size:0.68rem;color:#a855f7;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);padding:1px 7px;border-radius:10px;">👁 ${obsCount} observateur${obsCount>1?'s':''}</span>`
+      : '';
     return `<div class="event-card ${status}" data-code="${code}">
       <div class="event-badge ${status}">${icons[status]}</div>
       <div class="event-info">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
           <span class="event-name">${ev.name||code}</span>
           <span class="pill ${status}">${pillLabels[status]}</span>
+          ${obsBadge}
         </div>
         <div class="event-meta">
           <span class="event-code">${code}</span>
@@ -429,33 +470,70 @@ document.getElementById('stats-modal-close').addEventListener('click',()=>{
   document.getElementById('stats-modal-overlay').style.display='none';
 });
 
-let editingCode=null, wpCount=0;
+// ── Observers UI ──────────────────────────────────────────────────────────────
+function renderObserverList() {
+  const list = document.getElementById('f-observers-list');
+  if (!localObservers.length) {
+    list.innerHTML = `<div style="font-size:0.75rem;color:#475569;padding:4px 0">Aucun observateur ajouté — seul le créateur peut observer.</div>`;
+    return;
+  }
+  list.innerHTML = localObservers.map((uid, i) => `
+    <div class="observer-row">
+      <span class="obs-uid">${uid}</span>
+      <button class="btn btn-red btn-sm btn-icon" onclick="removeObserver(${i})" title="Retirer">✕</button>
+    </div>
+  `).join('');
+}
 
-document.getElementById('btn-new-event').addEventListener('click',()=>{
-  editingCode=null; wpCount=0;
-  document.getElementById('modal-title').textContent='Créer un événement';
-  document.getElementById('modal-save').textContent='Créer';
-  document.getElementById('f-code').disabled=false;
-  ['f-name','f-code','f-start-label','f-start-lat','f-start-lng','f-end-label','f-end-lat','f-end-lng'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-duration').value='8';
-  document.getElementById('f-waypoints').innerHTML='';
+window.removeObserver = function(idx) {
+  localObservers.splice(idx, 1);
+  renderObserverList();
+};
+
+document.getElementById('f-btn-add-obs').addEventListener('click', () => {
+  const input = document.getElementById('f-observer-input');
+  const uid = input.value.trim();
+  if (!uid) return;
+  if (localObservers.includes(uid)) { toast('UID déjà dans la liste', 'error'); return; }
+  localObservers.push(uid);
+  input.value = '';
+  renderObserverList();
+});
+
+document.getElementById('f-observer-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('f-btn-add-obs').click();
+});
+
+// ── Modal create/edit ─────────────────────────────────────────────────────────
+let editingCode = null, wpCount = 0;
+
+document.getElementById('btn-new-event').addEventListener('click', () => {
+  editingCode = null; wpCount = 0; localObservers = [];
+  document.getElementById('modal-title').textContent = 'Créer un événement';
+  document.getElementById('modal-save').textContent = 'Créer';
+  document.getElementById('f-code').disabled = false;
+  ['f-name','f-code','f-start-label','f-start-lat','f-start-lng','f-end-label','f-end-lat','f-end-lng'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-duration').value = '8';
+  document.getElementById('f-waypoints').innerHTML = '';
+  document.getElementById('f-observer-input').value = '';
+  renderObserverList();
   document.getElementById('modal-overlay').classList.add('open');
 });
 
-document.getElementById('modal-cancel').addEventListener('click',()=>{
+document.getElementById('modal-cancel').addEventListener('click', () => {
   document.getElementById('modal-overlay').classList.remove('open');
 });
 
-document.getElementById('f-code').addEventListener('input',e=>{
-  e.target.value=e.target.value.toUpperCase().replace(/\s/g,'');
+document.getElementById('f-code').addEventListener('input', e => {
+  e.target.value = e.target.value.toUpperCase().replace(/\s/g, '');
 });
 
-document.getElementById('f-btn-add-wp').addEventListener('click',()=>{
-  if(wpCount>=5)return toast('Maximum 5 étapes','error');
-  const idx=wpCount++;
-  const div=document.createElement('div');
-  div.id=`wp-block-${idx}`;
-  div.innerHTML=`
+document.getElementById('f-btn-add-wp').addEventListener('click', () => {
+  if (wpCount >= 5) return toast('Maximum 5 étapes', 'error');
+  const idx = wpCount++;
+  const div = document.createElement('div');
+  div.id = `wp-block-${idx}`;
+  div.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
       <span style="font-size:0.75rem;color:#94a3b8">Étape ${idx+1}</span>
       <button class="btn btn-red btn-sm btn-icon" onclick="document.getElementById('wp-block-${idx}').remove()">✕</button>
@@ -468,49 +546,65 @@ document.getElementById('f-btn-add-wp').addEventListener('click',()=>{
   document.getElementById('f-waypoints').appendChild(div);
 });
 
-document.getElementById('modal-save').addEventListener('click',async()=>{
-  const name=document.getElementById('f-name').value.trim();
-  const code=document.getElementById('f-code').value.trim().toUpperCase();
-  const duration=parseInt(document.getElementById('f-duration').value)||8;
-  if(!name||!code)return toast('Nom et code obligatoires','error');
-  if(!/^[A-Z0-9]+$/.test(code))return toast('Code : lettres et chiffres uniquement','error');
-  if(!editingCode){
-    const existing=await get(ref(db,`events/${code}`));
-    if(existing.exists())return toast(`Le code "${code}" est déjà pris`,'error');
+document.getElementById('modal-save').addEventListener('click', async () => {
+  const name = document.getElementById('f-name').value.trim();
+  const code = document.getElementById('f-code').value.trim().toUpperCase();
+  const duration = parseInt(document.getElementById('f-duration').value) || 8;
+  if (!name || !code) return toast('Nom et code obligatoires', 'error');
+  if (!/^[A-Z0-9]+$/.test(code)) return toast('Code : lettres et chiffres uniquement', 'error');
+  if (!editingCode) {
+    const existing = await get(ref(db, `events/${code}`));
+    if (existing.exists()) return toast(`Le code "${code}" est déjà pris`, 'error');
   }
-  const eventData={name,code,ownerUid:currentUser.uid,endsAt:Date.now()+duration*3600000,active:true,archived:false};
-  if(!editingCode)eventData.createdAt=Date.now();
-  const sLat=parseFloat(document.getElementById('f-start-lat').value);
-  const sLng=parseFloat(document.getElementById('f-start-lng').value);
-  const sLabel=document.getElementById('f-start-label').value.trim();
-  if(!isNaN(sLat)&&!isNaN(sLng))eventData.start={lat:sLat,lng:sLng,label:sLabel};
-  const eLat=parseFloat(document.getElementById('f-end-lat').value);
-  const eLng=parseFloat(document.getElementById('f-end-lng').value);
-  const eLabel=document.getElementById('f-end-label').value.trim();
-  if(!isNaN(eLat)&&!isNaN(eLng))eventData.end={lat:eLat,lng:eLng,label:eLabel};
-  const wps=[];
-  for(let i=0;i<wpCount;i++){
-    const el=document.getElementById(`wp-block-${i}`);
-    if(!el)continue;
-    const wLat=parseFloat(document.getElementById(`wp-lat-${i}`)?.value);
-    const wLng=parseFloat(document.getElementById(`wp-lng-${i}`)?.value);
-    const wLabel=document.getElementById(`wp-label-${i}`)?.value.trim()||`Étape ${i+1}`;
-    if(!isNaN(wLat)&&!isNaN(wLng))wps.push({lat:wLat,lng:wLng,label:wLabel});
+  const eventData = {
+    name, code,
+    ownerUid: currentUser.uid,
+    endsAt: Date.now() + duration * 3600000,
+    active: true,
+    archived: false
+  };
+  if (!editingCode) eventData.createdAt = Date.now();
+
+  // Observers — stockés comme objet { uid: true } pour les règles Firebase
+  if (localObservers.length) {
+    eventData.observers = {};
+    localObservers.forEach(uid => { eventData.observers[uid] = true; });
+  } else {
+    eventData.observers = null; // supprime le champ si vide
   }
-  if(wps.length)eventData.waypoints=wps;
-  const targetCode=editingCode||code;
-  if(editingCode){
-    await update(ref(db,`events/${targetCode}`),eventData);
-    toast('✅ Événement mis à jour','success');
-  }else{
-    await set(ref(db,`events/${targetCode}`),eventData);
-    toast(`✅ "${name}" créé — code : ${code}`,'success');
+
+  const sLat = parseFloat(document.getElementById('f-start-lat').value);
+  const sLng = parseFloat(document.getElementById('f-start-lng').value);
+  const sLabel = document.getElementById('f-start-label').value.trim();
+  if (!isNaN(sLat) && !isNaN(sLng)) eventData.start = { lat:sLat, lng:sLng, label:sLabel };
+  const eLat = parseFloat(document.getElementById('f-end-lat').value);
+  const eLng = parseFloat(document.getElementById('f-end-lng').value);
+  const eLabel = document.getElementById('f-end-label').value.trim();
+  if (!isNaN(eLat) && !isNaN(eLng)) eventData.end = { lat:eLat, lng:eLng, label:eLabel };
+  const wps = [];
+  for (let i = 0; i < wpCount; i++) {
+    const el = document.getElementById(`wp-block-${i}`);
+    if (!el) continue;
+    const wLat = parseFloat(document.getElementById(`wp-lat-${i}`)?.value);
+    const wLng = parseFloat(document.getElementById(`wp-lng-${i}`)?.value);
+    const wLabel = document.getElementById(`wp-label-${i}`)?.value.trim() || `Étape ${i+1}`;
+    if (!isNaN(wLat) && !isNaN(wLng)) wps.push({ lat:wLat, lng:wLng, label:wLabel });
+  }
+  if (wps.length) eventData.waypoints = wps;
+
+  const targetCode = editingCode || code;
+  if (editingCode) {
+    await update(ref(db, `events/${targetCode}`), eventData);
+    toast('✅ Événement mis à jour', 'success');
+  } else {
+    await set(ref(db, `events/${targetCode}`), eventData);
+    toast(`✅ "${name}" créé — code : ${code}`, 'success');
   }
   document.getElementById('modal-overlay').classList.remove('open');
 });
 
-const params=new URLSearchParams(location.search);
-if(params.get('code'))location.href=`app.html?code=${params.get('code')}`;
+const params = new URLSearchParams(location.search);
+if (params.get('code')) location.href = `app.html?code=${params.get('code')}`;
 </script>
 </body>
 </html>
