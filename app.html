@@ -59,48 +59,61 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
 /* Pick mode banner */
 #pick-banner { position:absolute; top:60px; left:50%; transform:translateX(-50%); z-index:2000; background:#f97316; color:white; padding:8px 20px; border-radius:8px; font-size:0.85rem; font-weight:600; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
 
+/* ── Auth modal Observer ── */
+#auth-modal {
+  position:fixed; inset:0; background:rgba(0,0,0,0.7);
+  z-index:2000; display:none; align-items:center; justify-content:center; padding:20px;
+}
+#auth-modal.open { display:flex; }
+.auth-modal-box {
+  background:#1e293b; border:1px solid #334155; border-radius:14px;
+  padding:32px 28px; max-width:380px; width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center;
+}
+.auth-modal-box .auth-icon { font-size:2rem; margin-bottom:12px; }
+.auth-modal-box h2 { font-size:1rem; font-weight:700; margin-bottom:8px; color:#e2e8f0; }
+.auth-modal-box p { font-size:0.82rem; color:#64748b; line-height:1.6; margin-bottom:20px; }
+.btn-google-modal {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  width:100%; padding:11px 20px; background:white; color:#1e293b;
+  border:none; border-radius:8px; font-size:0.88rem; font-weight:600;
+  cursor:pointer; transition:opacity 0.2s; margin-bottom:10px;
+}
+.btn-google-modal:hover { opacity:0.9; }
+.auth-modal-cancel { font-size:0.78rem; color:#475569; cursor:pointer; background:none; border:none; font-family:inherit; }
+.auth-modal-cancel:hover { color:#94a3b8; }
+
+/* ── Accès refusé ── */
+#access-denied-banner {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  z-index:1500; background:#1e293b; border:1px solid #ef4444;
+  border-radius:14px; padding:32px 28px; max-width:380px; width:90%;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5); text-align:center; display:none;
+}
+#access-denied-banner h2 { font-size:1rem; font-weight:700; color:#ef4444; margin-bottom:8px; }
+#access-denied-banner p { font-size:0.82rem; color:#94a3b8; line-height:1.6; margin-bottom:16px; }
+
 /* ── WATERMARK REPLAY ── */
 #replay-watermark {
-  position:absolute;
-  bottom:70px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:999;
-  display:none;
-  pointer-events:none;
-  align-items:center;
-  gap:7px;
-  background:rgba(15,23,42,0.72);
-  border:1px solid rgba(56,189,248,0.25);
-  border-radius:20px;
-  padding:5px 14px;
-  backdrop-filter:blur(4px);
+  position:absolute; bottom:70px; left:50%; transform:translateX(-50%);
+  z-index:999; display:none; pointer-events:none; align-items:center; gap:7px;
+  background:rgba(15,23,42,0.72); border:1px solid rgba(56,189,248,0.25);
+  border-radius:20px; padding:5px 14px; backdrop-filter:blur(4px);
 }
 #replay-watermark.visible { display:flex; }
-#replay-watermark span { font-size:0.68rem; color:rgba(226,232,240,0.75); letter-spacing:0.04em; font-family:'DM Sans',system-ui,sans-serif; }
+#replay-watermark span { font-size:0.68rem; color:rgba(226,232,240,0.75); letter-spacing:0.04em; }
 #replay-watermark .wm-logo { font-size:0.75rem; color:#38bdf8; font-weight:700; }
 
 /* ── ÉCRAN DE FIN ── */
 #replay-end-screen {
-  position:absolute;
-  inset:0;
-  z-index:1100;
-  display:none;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  background:rgba(10,17,32,0.88);
-  backdrop-filter:blur(8px);
+  position:absolute; inset:0; z-index:1100; display:none;
+  flex-direction:column; align-items:center; justify-content:center;
+  background:rgba(10,17,32,0.88); backdrop-filter:blur(8px);
 }
 #replay-end-screen.visible { display:flex; }
 .end-card {
-  background:#1e293b;
-  border:1px solid #334155;
-  border-radius:16px;
-  padding:36px 44px;
-  text-align:center;
-  max-width:440px;
-  width:90%;
+  background:#1e293b; border:1px solid #334155; border-radius:16px;
+  padding:36px 44px; text-align:center; max-width:440px; width:90%;
   box-shadow:0 8px 40px rgba(0,0,0,0.6);
 }
 .end-card h2 { font-size:1.3rem; font-weight:800; color:#e2e8f0; margin-bottom:4px; }
@@ -115,13 +128,7 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
 .end-actions { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
 
 /* ── CANVAS EXPORT ── */
-#export-canvas {
-  display:none;
-  position:absolute;
-  inset:0;
-  z-index:1050;
-  pointer-events:none;
-}
+#export-canvas { display:none; position:absolute; inset:0; z-index:1050; pointer-events:none; }
 </style>
 </head>
 <body>
@@ -150,22 +157,10 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
       <h2>🏁 Fin du replay</h2>
       <div class="end-event-name" id="end-event-name">—</div>
       <div class="end-stats">
-        <div class="end-stat">
-          <div class="val" id="end-stat-participants">—</div>
-          <div class="lbl">Participants</div>
-        </div>
-        <div class="end-stat">
-          <div class="val" id="end-stat-duration">—</div>
-          <div class="lbl">Durée</div>
-        </div>
-        <div class="end-stat">
-          <div class="val" id="end-stat-distance">—</div>
-          <div class="lbl">Distance moy.</div>
-        </div>
-        <div class="end-stat">
-          <div class="val" id="end-stat-points">—</div>
-          <div class="lbl">Points GPS</div>
-        </div>
+        <div class="end-stat"><div class="val" id="end-stat-participants">—</div><div class="lbl">Participants</div></div>
+        <div class="end-stat"><div class="val" id="end-stat-duration">—</div><div class="lbl">Durée</div></div>
+        <div class="end-stat"><div class="val" id="end-stat-distance">—</div><div class="lbl">Distance moy.</div></div>
+        <div class="end-stat"><div class="val" id="end-stat-points">—</div><div class="lbl">Points GPS</div></div>
       </div>
       <div class="end-actions">
         <button class="btn btn-blue" id="end-btn-restart">↩ Rejouer</button>
@@ -181,8 +176,29 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
     </div>
   </div>
 
+  <!-- Accès refusé -->
+  <div id="access-denied-banner">
+    <h2>🚫 Accès refusé</h2>
+    <p>L'observation est réservée au créateur de l'événement et aux observateurs qu'il a autorisés.</p>
+    <button class="btn btn-gray" onclick="document.getElementById('access-denied-banner').style.display='none'">Fermer</button>
+  </div>
+
   <!-- Canvas export vidéo -->
   <canvas id="export-canvas"></canvas>
+</div>
+
+<!-- Auth modal Observer -->
+<div id="auth-modal">
+  <div class="auth-modal-box">
+    <div class="auth-icon">👁</div>
+    <h2>Connexion requise</h2>
+    <p>L'observation d'un événement est réservée aux organisateurs. Connecte-toi avec le compte Google de l'organisateur.</p>
+    <button class="btn-google-modal" id="auth-modal-google-btn">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+      Continuer avec Google
+    </button>
+    <button class="auth-modal-cancel" id="auth-modal-cancel">Annuler</button>
+  </div>
 </div>
 
 <div id="pick-banner">📍 Cliquez sur la carte pour placer le point</div>
@@ -210,7 +226,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
     <input id="create-code" placeholder="ex: PELE2025"/>
     <label>Durée (heures)</label>
     <input id="create-duration" type="number" value="8" min="1" max="72"/>
-
     <div class="section-title">Départ (facultatif)</div>
     <label>Nom du départ</label>
     <input id="start-label" placeholder="ex: Cathédrale de Tours"/>
@@ -219,7 +234,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
       <input id="start-lng" placeholder="Longitude"/>
     </div>
     <button class="btn btn-gray btn-pick" id="btn-pick-start">📍 Placer sur la carte</button>
-
     <div class="section-title">Arrivée (facultatif)</div>
     <label>Nom de l'arrivée</label>
     <input id="end-label" placeholder="ex: Sanctuaire de Lourdes"/>
@@ -228,7 +242,6 @@ body { font-family:system-ui,sans-serif; background:#0f172a; color:#e2e8f0; heig
       <input id="end-lng" placeholder="Longitude"/>
     </div>
     <button class="btn btn-gray btn-pick" id="btn-pick-end">📍 Placer sur la carte</button>
-
     <div class="section-title">Étapes (max 5, facultatif)</div>
     <div id="waypoints-container"></div>
     <button class="btn btn-gray" style="width:100%;margin-bottom:8px" id="btn-add-wp">+ Ajouter une étape</button>
@@ -285,7 +298,6 @@ import { getDatabase, ref, set, onValue, push, get } from "https://www.gstatic.c
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getLicence, PLANS, renderPlanBadge } from './licence-check.js';
 
-// Licence active pour l'événement en cours — mise à jour à chaque join/watch
 let currentLicence = { plan:'freemium', limits:PLANS.freemium, source:'default', expired:false };
 
 const firebaseConfig = {
@@ -301,17 +313,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-// Utilisateur connecté (optionnel — pour ownerUid)
 let currentUser = null;
 onAuthStateChanged(auth, user => { currentUser = user; });
 
 // ── Tile layers ──
 const LAYERS = {
-  osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }),
+  osm:       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }),
   satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution:'© Esri' }),
-  topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution:'© OpenTopoMap' }),
-  dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution:'© CartoDB' }),
+  topo:      L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution:'© OpenTopoMap' }),
+  dark:      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution:'© CartoDB' }),
   parchment: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution:'© CartoDB' })
 };
 
@@ -335,7 +347,7 @@ let liveMarkers = {}, livePolylines = {}, liveTrails = {};
 let liveUnsub = null;
 let replayData = {}, replayInterval = null, replayPlaying = false;
 let replayIndex = 0, replayTimestamps = [], replaySpeed = 10;
-let replayRawPoints = {}; // pid -> [{lat,lng,ts,pseudo,team}]
+let replayRawPoints = {};
 let pickMode = null;
 let wpCount = 0;
 let eventMarkers = [];
@@ -399,6 +411,44 @@ function buildPopup(pid) {
     </div>
   </div>`;
 }
+
+// ── Vérification accès observateur ───────────────────────────────────────────
+async function canWatch(code, uid) {
+  const snap = await get(ref(db, `events/${code}`));
+  if (!snap.exists()) return { allowed: false, reason: 'event_not_found' };
+  const evData = snap.val();
+  if (evData.ownerUid === uid) return { allowed: true, evData };
+  if (evData.observers && evData.observers[uid] === true) return { allowed: true, evData };
+  return { allowed: false, reason: 'not_authorized', evData };
+}
+
+// ── Auth modal Observer ───────────────────────────────────────────────────────
+let pendingWatchCode = null;
+
+function openAuthModal(code) {
+  pendingWatchCode = code;
+  document.getElementById('auth-modal').classList.add('open');
+}
+
+function closeAuthModal() {
+  document.getElementById('auth-modal').classList.remove('open');
+  pendingWatchCode = null;
+}
+
+document.getElementById('auth-modal-cancel').addEventListener('click', closeAuthModal);
+
+document.getElementById('auth-modal-google-btn').addEventListener('click', async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    currentUser = result.user;
+    closeAuthModal();
+    if (pendingWatchCode) {
+      await launchWatch(pendingWatchCode);
+    }
+  } catch(e) {
+    console.warn('Auth error:', e);
+  }
+});
 
 // ── Pick mode ──
 function enterPickMode(target) {
@@ -503,18 +553,13 @@ async function startWatching(code) {
     currentEventName = evData.name || code;
   }
 
-  // ── Filtre historique selon historyDays du plan ──
   const historyDays = currentLicence.limits.historyDays;
-  const cutoff = historyDays === Infinity
-    ? 0
-    : Date.now() - historyDays * 24 * 3600 * 1000;
+  const cutoff = historyDays === Infinity ? 0 : Date.now() - historyDays * 24 * 3600 * 1000;
 
   const histSnap = await get(ref(db, `history/${code}`));
   const histData = histSnap.val() || {};
   Object.entries(histData).forEach(([pid, entries]) => {
-    const sorted = Object.values(entries)
-      .filter(e => e.ts >= cutoff)   // ← filtre selon le plan
-      .sort((a,b) => a.ts-b.ts);
+    const sorted = Object.values(entries).filter(e => e.ts >= cutoff).sort((a,b) => a.ts-b.ts);
     if (!sorted.length) return;
     liveTrails[pid] = sorted.map(e => [e.lat, e.lng]);
     const color = getColor(pid);
@@ -586,76 +631,46 @@ async function startWatching(code) {
   });
 }
 
+// ── Launch watch avec vérification ───────────────────────────────────────────
+async function launchWatch(code) {
+  if (!currentUser) {
+    // Pas connecté → ouvrir la modal auth
+    document.getElementById('watch-code').value = code;
+    closePanel();
+    openAuthModal(code);
+    return;
+  }
+
+  const { allowed, evData, reason } = await canWatch(code, currentUser.uid);
+
+  if (!allowed) {
+    closePanel();
+    document.getElementById('access-denied-banner').style.display = 'block';
+    return;
+  }
+
+  // Accès autorisé
+  currentEventCode = code;
+  currentLicence = await getLicence(db, { code, uid: currentUser.uid });
+  const existingBadge = document.getElementById('plan-badge');
+  if (existingBadge) existingBadge.remove();
+  const badge = document.createElement('span');
+  badge.id = 'plan-badge';
+  badge.innerHTML = renderPlanBadge(currentLicence.plan);
+  document.getElementById('topbar').appendChild(badge);
+
+  setStatus(`👁 Observation — ${code}`, 'live');
+  closePanel();
+  document.getElementById('participants-list').style.display = 'block';
+  document.getElementById('btn-replay').style.display = 'inline-block';
+  startWatching(code);
+}
+
 function clearMap() {
   Object.values(liveMarkers).forEach(m=>map.removeLayer(m));
   Object.values(livePolylines).forEach(p=>map.removeLayer(p));
   eventMarkers.forEach(m=>map.removeLayer(m));
   liveMarkers={}; livePolylines={}; liveTrails={}; eventMarkers=[];
-}
-
-// ── Replay ──
-function showWatermark(visible) {
-  document.getElementById('replay-watermark').classList.toggle('visible', visible);
-}
-
-function showEndScreen(show) {
-  document.getElementById('replay-end-screen').classList.toggle('visible', show);
-}
-
-function fillEndStats() {
-  document.getElementById('end-event-name').textContent = currentEventName;
-  const nbParticipants = Object.keys(replayData).length;
-  document.getElementById('end-stat-participants').textContent = nbParticipants;
-
-  if (replayTimestamps.length >= 2) {
-    const totalMs = replayTimestamps[replayTimestamps.length-1] - replayTimestamps[0];
-    const h = Math.floor(totalMs/3600000), m = Math.floor((totalMs%3600000)/60000);
-    document.getElementById('end-stat-duration').textContent = h>0 ? `${h}h${String(m).padStart(2,'0')}` : `${m} min`;
-  }
-
-  let totalDist = 0;
-  Object.entries(replayRawPoints).forEach(([pid, pts]) => {
-    let d = 0;
-    for (let i=1;i<pts.length;i++) d += haversine(pts[i-1].lat,pts[i-1].lng,pts[i].lat,pts[i].lng);
-    totalDist += d;
-  });
-  const avgDist = nbParticipants > 0 ? totalDist/nbParticipants : 0;
-  document.getElementById('end-stat-distance').textContent = formatDist(avgDist);
-
-  let totalPts = 0;
-  Object.values(replayRawPoints).forEach(pts => totalPts += pts.length);
-  document.getElementById('end-stat-points').textContent = totalPts;
-}
-
-function renderReplayFrame(idx) {
-  const ts = replayTimestamps[idx];
-  Object.entries(replayData).forEach(([pid, entries]) => {
-    const times = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>b-a);
-    if (!times.length) { if(liveMarkers[pid]){map.removeLayer(liveMarkers[pid]);delete liveMarkers[pid];} return; }
-    const pos = entries[times[0]];
-    const color = getColor(pid);
-    const team = pos.team || participantTeams[pid] || '';
-    if (liveMarkers[pid]) {
-      liveMarkers[pid].setLatLng([pos.lat,pos.lng]);
-      liveMarkers[pid].setIcon(makeLabelIcon(color, pos.pseudo||pid, team));
-    } else {
-      liveMarkers[pid] = L.marker([pos.lat,pos.lng],{icon:makeLabelIcon(color, pos.pseudo||pid, team)}).addTo(map)
-        .bindPopup(`<b>${pos.pseudo||pid}</b>${team?`<br><span style="color:#a855f7">👥 ${team}</span>`:''}`);
-    }
-    const trail = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>a-b).map(t=>[entries[t].lat,entries[t].lng]);
-    if (livePolylines[pid]) livePolylines[pid].setLatLngs(trail);
-    else livePolylines[pid]=L.polyline(trail,{color,weight:3,opacity:0.7}).addTo(map);
-  });
-
-  document.getElementById('replay-slider').value=idx;
-  const elapsed=ts-replayTimestamps[0];
-  const h=Math.floor(elapsed/3600000), m=Math.floor((elapsed%3600000)/60000), s=Math.floor((elapsed%60000)/1000);
-  document.getElementById('replay-time').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-
-  if (idx >= replayTimestamps.length-1) {
-    fillEndStats();
-    showEndScreen(true);
-  }
 }
 
 // ── Buttons ──
@@ -666,19 +681,24 @@ document.getElementById('btn-close-panel').addEventListener('click', closePanel)
 document.getElementById('btn-pick-start').addEventListener('click', ()=>enterPickMode('start'));
 document.getElementById('btn-pick-end').addEventListener('click', ()=>enterPickMode('end'));
 
+document.getElementById('btn-do-watch').addEventListener('click', async () => {
+  const code = document.getElementById('watch-code').value.trim().toUpperCase();
+  if (!code) return alert('Entre un code');
+  const snap = await get(ref(db, `events/${code}`));
+  if (!snap.exists()) return alert('Événement introuvable');
+  await launchWatch(code);
+});
+
 document.getElementById('btn-do-create').addEventListener('click', async () => {
   const name = document.getElementById('create-name').value.trim();
   const code = document.getElementById('create-code').value.trim().toUpperCase();
   const duration = parseInt(document.getElementById('create-duration').value) || 8;
   if (!name || !code) return alert('Remplis le nom et le code');
-
-  // ── Vérification durée selon licence ──
   const licenceForCreate = await getLicence(db, { code, uid: currentUser?.uid });
   const maxDuration = licenceForCreate.limits.maxEventDuration;
   if (maxDuration < Infinity && duration > maxDuration) {
-    return alert(`⚠️ Votre plan ${licenceForCreate.limits.label} limite la durée d'un événement à ${maxDuration}h.\n\nPassez au plan Pro pour des événements sans limite de durée.`);
+    return alert(`⚠️ Votre plan ${licenceForCreate.limits.label} limite la durée à ${maxDuration}h.`);
   }
-
   const existing = await get(ref(db,`events/${code}`));
   if (existing.exists()) return alert(`Le code "${code}" est déjà utilisé.`);
   const eventData = { name, code, createdAt:Date.now(), endsAt:Date.now()+duration*3600000, active:true };
@@ -713,28 +733,21 @@ document.getElementById('btn-do-join').addEventListener('click', async () => {
   if (!code||!pseudo) return alert('Remplis tous les champs');
   const snap=await get(ref(db,`events/${code}`));
   if (!snap.exists()) return alert('Événement introuvable');
-
-  // ── Vérification licence ──
   currentLicence = await getLicence(db, { code, uid: currentUser?.uid });
   const limits = currentLicence.limits;
-
-  // Vérifier le nombre de participants actuels vs limite du plan
   if (limits.maxParticipants < Infinity) {
     const posSnap = await get(ref(db, `positions/${code}`));
     const currentCount = posSnap.exists() ? Object.keys(posSnap.val()).length : 0;
     if (currentCount >= limits.maxParticipants) {
-      return alert(`⚠️ Cet événement est limité à ${limits.maxParticipants} participants (plan ${currentLicence.limits.label}).\n\nL'organisateur doit passer au plan supérieur pour accueillir plus de participants.`);
+      return alert(`⚠️ Cet événement est limité à ${limits.maxParticipants} participants.`);
     }
   }
-
-  // Afficher le badge plan dans la topbar
   const existingBadge = document.getElementById('plan-badge');
   if (existingBadge) existingBadge.remove();
   const badge = document.createElement('span');
   badge.id = 'plan-badge';
   badge.innerHTML = renderPlanBadge(currentLicence.plan);
   document.getElementById('topbar').appendChild(badge);
-
   currentEventCode=code;
   const storageKey = `participant_${code}`;
   myParticipantId = localStorage.getItem(storageKey);
@@ -747,7 +760,6 @@ document.getElementById('btn-do-join').addEventListener('click', async () => {
   closePanel();
   document.getElementById('btn-stop').style.display='inline-block';
   document.getElementById('participants-list').style.display='block';
-  startWatching(code);
 
   let wakeLock = null;
   const requestWakeLock = async () => {
@@ -777,28 +789,6 @@ document.getElementById('btn-do-join').addEventListener('click', async () => {
   trackingInterval=setInterval(writePos,5000);
 });
 
-document.getElementById('btn-do-watch').addEventListener('click', async () => {
-  const code=document.getElementById('watch-code').value.trim().toUpperCase();
-  if (!code) return alert('Entre un code');
-  const snap=await get(ref(db,`events/${code}`));
-  if (!snap.exists()) return alert('Événement introuvable');
-  currentEventCode=code;
-
-  // ── Vérification licence ──
-  currentLicence = await getLicence(db, { code, uid: currentUser?.uid });
-  const existingBadge = document.getElementById('plan-badge');
-  if (existingBadge) existingBadge.remove();
-  const badge = document.createElement('span');
-  badge.id = 'plan-badge';
-  badge.innerHTML = renderPlanBadge(currentLicence.plan);
-  document.getElementById('topbar').appendChild(badge);
-  setStatus(`👁 Observation — ${code}`,'live');
-  closePanel();
-  document.getElementById('participants-list').style.display='block';
-  document.getElementById('btn-replay').style.display='inline-block';
-  startWatching(code);
-});
-
 document.getElementById('btn-stop').addEventListener('click', ()=>{
   if (trackingInterval) clearInterval(trackingInterval);
   if (liveUnsub) liveUnsub();
@@ -808,32 +798,74 @@ document.getElementById('btn-stop').addEventListener('click', ()=>{
   setStatus('En attente','');
 });
 
+// ── Replay ──
+function showWatermark(visible) {
+  document.getElementById('replay-watermark').classList.toggle('visible', visible);
+}
+function showEndScreen(show) {
+  document.getElementById('replay-end-screen').classList.toggle('visible', show);
+}
+
+function fillEndStats() {
+  document.getElementById('end-event-name').textContent = currentEventName;
+  const nbParticipants = Object.keys(replayData).length;
+  document.getElementById('end-stat-participants').textContent = nbParticipants;
+  if (replayTimestamps.length >= 2) {
+    const totalMs = replayTimestamps[replayTimestamps.length-1] - replayTimestamps[0];
+    const h = Math.floor(totalMs/3600000), m = Math.floor((totalMs%3600000)/60000);
+    document.getElementById('end-stat-duration').textContent = h>0 ? `${h}h${String(m).padStart(2,'0')}` : `${m} min`;
+  }
+  let totalDist = 0;
+  Object.entries(replayRawPoints).forEach(([pid, pts]) => {
+    let d = 0;
+    for (let i=1;i<pts.length;i++) d += haversine(pts[i-1].lat,pts[i-1].lng,pts[i].lat,pts[i].lng);
+    totalDist += d;
+  });
+  const avgDist = nbParticipants > 0 ? totalDist/nbParticipants : 0;
+  document.getElementById('end-stat-distance').textContent = formatDist(avgDist);
+  let totalPts = 0;
+  Object.values(replayRawPoints).forEach(pts => totalPts += pts.length);
+  document.getElementById('end-stat-points').textContent = totalPts;
+}
+
+function renderReplayFrame(idx) {
+  const ts = replayTimestamps[idx];
+  Object.entries(replayData).forEach(([pid, entries]) => {
+    const times = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>b-a);
+    if (!times.length) { if(liveMarkers[pid]){map.removeLayer(liveMarkers[pid]);delete liveMarkers[pid];} return; }
+    const pos = entries[times[0]];
+    const color = getColor(pid);
+    const team = pos.team || participantTeams[pid] || '';
+    if (liveMarkers[pid]) {
+      liveMarkers[pid].setLatLng([pos.lat,pos.lng]);
+      liveMarkers[pid].setIcon(makeLabelIcon(color, pos.pseudo||pid, team));
+    } else {
+      liveMarkers[pid] = L.marker([pos.lat,pos.lng],{icon:makeLabelIcon(color, pos.pseudo||pid, team)}).addTo(map)
+        .bindPopup(`<b>${pos.pseudo||pid}</b>${team?`<br><span style="color:#a855f7">👥 ${team}</span>`:''}`);
+    }
+    const trail = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>a-b).map(t=>[entries[t].lat,entries[t].lng]);
+    if (livePolylines[pid]) livePolylines[pid].setLatLngs(trail);
+    else livePolylines[pid]=L.polyline(trail,{color,weight:3,opacity:0.7}).addTo(map);
+  });
+  document.getElementById('replay-slider').value=idx;
+  const elapsed=ts-replayTimestamps[0];
+  const h=Math.floor(elapsed/3600000), m=Math.floor((elapsed%3600000)/60000), s=Math.floor((elapsed%60000)/1000);
+  document.getElementById('replay-time').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if (idx >= replayTimestamps.length-1) { fillEndStats(); showEndScreen(true); }
+}
+
 function interpolateTrack(points) {
   if (points.length < 2) return points;
   const result = [];
-
   for (let i = 0; i < points.length - 1; i++) {
     const a = points[i], b = points[i + 1];
-    const dt = b.ts - a.ts; // ms entre les deux points
-
-    // 1 point par minute si gap ≥ 20s, sinon 20 interpolations fixes (mouvement fluide)
-    const steps = dt >= 20000
-      ? Math.max(2, Math.round(dt / 60000))  // 1 pt/min — vitesse réaliste sur longue perte
-      : 20;                                   // 20 pts fixes — fluide sur courte distance
-
+    const dt = b.ts - a.ts;
+    const steps = dt >= 20000 ? Math.max(2, Math.round(dt / 60000)) : 20;
     for (let s = 0; s < steps; s++) {
       const t = s / steps;
-      result.push({
-        lat:          a.lat + (b.lat - a.lat) * t,
-        lng:          a.lng + (b.lng - a.lng) * t,
-        ts:           Math.round(a.ts + dt * t),
-        pseudo:       a.pseudo,
-        team:         a.team || '',
-        interpolated: true
-      });
+      result.push({ lat: a.lat+(b.lat-a.lat)*t, lng: a.lng+(b.lng-a.lng)*t, ts: Math.round(a.ts+dt*t), pseudo: a.pseudo, team: a.team||'', interpolated: true });
     }
   }
-
   result.push(points[points.length - 1]);
   return result;
 }
@@ -841,38 +873,25 @@ function interpolateTrack(points) {
 document.getElementById('btn-replay').addEventListener('click', async ()=>{
   if (!currentEventCode) return alert("Observe un événement d'abord");
   setStatus('⏪ Chargement…','replay');
-
   map.removeLayer(LAYERS[currentLayer]);
   map.addLayer(LAYERS.parchment);
   document.querySelector('input[value=parchment]').checked=true;
   currentLayer='parchment';
-
-  // ── Filtre replay selon historyDays du plan ──
   const historyDays = currentLicence.limits.historyDays;
-  const cutoff = historyDays === Infinity
-    ? 0
-    : Date.now() - historyDays * 24 * 3600 * 1000;
-
+  const cutoff = historyDays === Infinity ? 0 : Date.now() - historyDays * 24 * 3600 * 1000;
   const snap=await get(ref(db,`history/${currentEventCode}`));
   const raw=snap.val()||{};
   replayData={}; replayRawPoints={};
   let allTs=new Set();
-
   Object.entries(raw).forEach(([pid, entries])=>{
-    const sorted = Object.values(entries)
-      .filter(e => e.ts >= cutoff)   // ← filtre selon le plan
-      .sort((a,b)=>a.ts-b.ts);
+    const sorted = Object.values(entries).filter(e => e.ts >= cutoff).sort((a,b)=>a.ts-b.ts);
     if (!sorted.length) return;
     replayRawPoints[pid] = sorted;
     if (sorted[0]?.team) participantTeams[pid] = sorted[0].team;
     const interpolated = interpolateTrack(sorted);
     replayData[pid]={};
-    interpolated.forEach(e=>{
-      replayData[pid][e.ts]={lat:e.lat, lng:e.lng, pseudo:e.pseudo||pid, team:e.team||''};
-      allTs.add(e.ts);
-    });
+    interpolated.forEach(e=>{ replayData[pid][e.ts]={lat:e.lat, lng:e.lng, pseudo:e.pseudo||pid, team:e.team||''}; allTs.add(e.ts); });
   });
-
   replayTimestamps=Array.from(allTs).sort((a,b)=>a-b);
   if (replayTimestamps.length<2) return alert('Pas assez de données pour un replay');
   Object.values(liveMarkers).forEach(m=>map.removeLayer(m));
@@ -892,11 +911,7 @@ document.getElementById('replay-play-btn').addEventListener('click', ()=>{
   document.getElementById('replay-play-btn').textContent=replayPlaying?'⏸':'▶';
   if (replayPlaying) {
     replayInterval=setInterval(()=>{
-      if (replayIndex>=replayTimestamps.length-1){
-        replayPlaying=false; clearInterval(replayInterval);
-        document.getElementById('replay-play-btn').textContent='▶';
-        return;
-      }
+      if (replayIndex>=replayTimestamps.length-1){replayPlaying=false;clearInterval(replayInterval);document.getElementById('replay-play-btn').textContent='▶';return;}
       replayIndex++; renderReplayFrame(replayIndex);
     },200/replaySpeed);
   } else clearInterval(replayInterval);
@@ -920,11 +935,9 @@ document.getElementById('replay-speed').addEventListener('change',e=>{
 });
 
 document.getElementById('replay-stop-btn').addEventListener('click', ()=>{
-  clearInterval(replayInterval);
-  replayPlaying=false;
+  clearInterval(replayInterval); replayPlaying=false;
   document.getElementById('replay-bar').classList.remove('visible');
-  showWatermark(false);
-  showEndScreen(false);
+  showWatermark(false); showEndScreen(false);
   Object.values(liveMarkers).forEach(m=>map.removeLayer(m));
   Object.values(livePolylines).forEach(p=>map.removeLayer(p));
   liveMarkers={}; livePolylines={};
@@ -936,397 +949,200 @@ document.getElementById('replay-stop-btn').addEventListener('click', ()=>{
   if (currentEventCode) startWatching(currentEventCode);
 });
 
-// ── Écran de fin — actions ──
-document.getElementById('end-btn-restart').addEventListener('click', ()=>{
-  showEndScreen(false);
-  replayIndex=0;
-  renderReplayFrame(0);
-});
-
-document.getElementById('end-btn-close').addEventListener('click', ()=>{
-  document.getElementById('replay-stop-btn').click();
-});
+document.getElementById('end-btn-restart').addEventListener('click', ()=>{ showEndScreen(false); replayIndex=0; renderReplayFrame(0); });
+document.getElementById('end-btn-close').addEventListener('click', ()=>{ document.getElementById('replay-stop-btn').click(); });
 
 document.getElementById('end-btn-export').addEventListener('click', ()=>{
-  if (!currentLicence.limits.exportVideo) {
-    return alert(`⬆️ Export vidéo disponible à partir du plan Standard (15 €/événement).\n\nContactez-nous pour obtenir une licence : contact@convergence-map.app`);
-  }
+  if (!currentLicence.limits.exportVideo) return alert(`⬆️ Export vidéo disponible à partir du plan Standard.`);
   startVideoExport();
 });
-
 document.getElementById('btn-record').addEventListener('click', ()=>{
-  if (!currentLicence.limits.exportVideo) {
-    return alert(`⬆️ Export vidéo disponible à partir du plan Standard (15 €/événement).\n\nContactez-nous : contact@convergence-map.app`);
-  }
+  if (!currentLicence.limits.exportVideo) return alert(`⬆️ Export vidéo disponible à partir du plan Standard.`);
   startVideoExport();
 });
 
-// ── Export GPX global ──────────────────────────────────────────────────────────
 function exportGpx() {
-  if (!currentLicence.limits.exportGpx) {
-    return alert(`⬆️ Export GPX disponible à partir du plan Standard (15 €/événement).`);
-  }
-  if (!Object.keys(replayRawPoints).length) {
-    return alert('Lance un replay d\'abord pour charger les données.');
-  }
-
+  if (!currentLicence.limits.exportGpx) return alert(`⬆️ Export GPX disponible à partir du plan Standard.`);
+  if (!Object.keys(replayRawPoints).length) return alert('Lance un replay d\'abord.');
   const eventName = currentEventName || currentEventCode || 'convergence';
-  const now = new Date().toISOString();
-
-  let gpx = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="Convergence Map" xmlns="http://www.topografix.com/GPX/1/1">
-  <metadata>
-    <name>${eventName}</name>
-    <time>${now}</time>
-  </metadata>
-`;
-
+  let gpx = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Convergence Map" xmlns="http://www.topografix.com/GPX/1/1">\n  <metadata><name>${eventName}</name><time>${new Date().toISOString()}</time></metadata>\n`;
   Object.entries(replayRawPoints).forEach(([pid, points]) => {
     if (!points.length) return;
     const pseudo = points[0].pseudo || pid;
-    const team   = points[0].team  || '';
+    const team = points[0].team || '';
     const trkName = team ? `${pseudo} · ${team}` : pseudo;
-
     gpx += `  <trk>\n    <name>${trkName}</name>\n    <trkseg>\n`;
-    points.forEach(pt => {
-      const dt = new Date(pt.ts).toISOString();
-      gpx += `      <trkpt lat="${pt.lat.toFixed(7)}" lon="${pt.lng.toFixed(7)}">\n`;
-      gpx += `        <time>${dt}</time>\n`;
-      gpx += `      </trkpt>\n`;
-    });
+    points.forEach(pt => { gpx += `      <trkpt lat="${pt.lat.toFixed(7)}" lon="${pt.lng.toFixed(7)}">\n        <time>${new Date(pt.ts).toISOString()}</time>\n      </trkpt>\n`; });
     gpx += `    </trkseg>\n  </trk>\n`;
   });
-
   gpx += `</gpx>`;
-
-  const blob = new Blob([gpx], { type: 'application/gpx+xml' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `${currentEventCode || 'convergence'}-traces.gpx`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([gpx], { type:'application/gpx+xml' }));
+  a.download = `${currentEventCode||'convergence'}-traces.gpx`;
   a.click();
-  URL.revokeObjectURL(url);
 }
 
-// ── Export CSV global ──────────────────────────────────────────────────────────
 function exportCsv() {
-  if (!currentLicence.limits.exportGpx) {
-    return alert(`⬆️ Export CSV disponible à partir du plan Standard (15 €/événement).`);
-  }
-  if (!Object.keys(replayRawPoints).length) {
-    return alert('Lance un replay d\'abord pour charger les données.');
-  }
-
-  const rows = [['participant', 'equipe', 'lat', 'lng', 'timestamp_ms', 'datetime']];
-
+  if (!currentLicence.limits.exportGpx) return alert(`⬆️ Export CSV disponible à partir du plan Standard.`);
+  if (!Object.keys(replayRawPoints).length) return alert('Lance un replay d\'abord.');
+  const rows = [['participant','equipe','lat','lng','timestamp_ms','datetime']];
   Object.entries(replayRawPoints).forEach(([pid, points]) => {
     points.forEach(pt => {
-      const pseudo  = pt.pseudo || pid;
-      const team    = pt.team   || '';
-      const dt      = new Date(pt.ts).toLocaleString('fr-FR');
-      rows.push([
-        `"${pseudo}"`,
-        `"${team}"`,
-        pt.lat.toFixed(7),
-        pt.lng.toFixed(7),
-        pt.ts,
-        `"${dt}"`
-      ]);
+      rows.push([`"${pt.pseudo||pid}"`,`"${pt.team||''}"`,pt.lat.toFixed(7),pt.lng.toFixed(7),pt.ts,`"${new Date(pt.ts).toLocaleString('fr-FR')}"`]);
     });
   });
-
-  const csv  = rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `${currentEventCode || 'convergence'}-traces.csv`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+rows.map(r=>r.join(',')).join('\n')], { type:'text/csv;charset=utf-8;' }));
+  a.download = `${currentEventCode||'convergence'}-traces.csv`;
   a.click();
-  URL.revokeObjectURL(url);
 }
 
-// ── Listeners export GPX / CSV ─────────────────────────────────────────────────
 document.getElementById('end-btn-gpx').addEventListener('click', exportGpx);
 document.getElementById('end-btn-csv').addEventListener('click', exportCsv);
 document.getElementById('btn-export-gpx').addEventListener('click', exportGpx);
 document.getElementById('btn-export-csv').addEventListener('click', exportCsv);
 
-// ── Export vidéo MP4 via canvas overlay ──
+// ── Export vidéo MP4 ── (identique à l'original)
 async function startVideoExport() {
   if (!replayTimestamps.length) return alert('Lance un replay d\'abord');
-
   const mapEl = document.getElementById('map');
   const W = mapEl.clientWidth, H = mapEl.clientHeight;
-
   const canvas = document.getElementById('export-canvas');
   canvas.width = W; canvas.height = H;
   canvas.style.display = 'block';
   const ctx = canvas.getContext('2d');
-
   showEndScreen(false);
-  replayIndex = 0;
-  clearInterval(replayInterval);
-  replayPlaying = false;
+  replayIndex = 0; clearInterval(replayInterval); replayPlaying = false;
   document.getElementById('replay-play-btn').textContent = '▶';
-
   let stream, recorder, chunks = [];
   try {
     stream = canvas.captureStream(30);
     recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
-  } catch(e) {
-    canvas.style.display = 'none';
-    return alert('Votre navigateur ne supporte pas l\'export vidéo (essayez Chrome).');
-  }
+  } catch(e) { canvas.style.display = 'none'; return alert('Votre navigateur ne supporte pas l\'export vidéo (essayez Chrome).'); }
   recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
   recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: 'video/webm' });
-    const url = URL.createObjectURL(blob);
+    const blob = new Blob(chunks, { type:'video/webm' });
     const a = document.createElement('a');
-    a.href = url; a.download = `replay-${currentEventCode || 'convergence'}.webm`;
-    a.click();
-    URL.revokeObjectURL(url);
-    canvas.style.display = 'none';
-    ctx.clearRect(0, 0, W, H);
+    a.href = URL.createObjectURL(blob); a.download = `replay-${currentEventCode||'convergence'}.webm`;
+    a.click(); URL.revokeObjectURL(a.href);
+    canvas.style.display = 'none'; ctx.clearRect(0,0,W,H);
     setStatus('⏪ Replay','replay');
   };
-
   recorder.start();
-
   const TILE_URLS = {
-    osm:       (z,x,y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
-    topo:      (z,x,y) => `https://a.tile.opentopomap.org/${z}/${x}/${y}.png`,
-    dark:      (z,x,y) => `https://a.basemaps.cartocdn.com/dark_all/${z}/${x}/${y}.png`,
-    parchment: (z,x,y) => `https://a.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}.png`,
+    osm:       (z,x,y)=>`https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
+    topo:      (z,x,y)=>`https://a.tile.opentopomap.org/${z}/${x}/${y}.png`,
+    dark:      (z,x,y)=>`https://a.basemaps.cartocdn.com/dark_all/${z}/${x}/${y}.png`,
+    parchment: (z,x,y)=>`https://a.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}.png`,
     satellite: null
   };
-
   function getTileRange() {
-    const z = map.getZoom();
-    const bounds = map.getBounds();
-    const tileSize = 256;
-    const lngToX = (lng,z) => Math.floor((lng+180)/360*Math.pow(2,z));
-    const latToY = (lat,z) => {
-      const r=Math.PI/180;
-      return Math.floor((1-Math.log(Math.tan(lat*r)+1/Math.cos(lat*r))/Math.PI)/2*Math.pow(2,z));
-    };
-    return {
-      z, tileSize,
-      xMin:lngToX(bounds.getWest(),z), xMax:lngToX(bounds.getEast(),z),
-      yMin:latToY(bounds.getNorth(),z), yMax:latToY(bounds.getSouth(),z)
-    };
+    const z=map.getZoom(), bounds=map.getBounds(), tileSize=256;
+    const lngToX=(lng,z)=>Math.floor((lng+180)/360*Math.pow(2,z));
+    const latToY=(lat,z)=>{const r=Math.PI/180;return Math.floor((1-Math.log(Math.tan(lat*r)+1/Math.cos(lat*r))/Math.PI)/2*Math.pow(2,z));};
+    return { z,tileSize,xMin:lngToX(bounds.getWest(),z),xMax:lngToX(bounds.getEast(),z),yMin:latToY(bounds.getNorth(),z),yMax:latToY(bounds.getSouth(),z) };
   }
-
   async function preloadTiles() {
-    const fn = TILE_URLS[currentLayer];
-    if (!fn) return null;
-    const { z, xMin, xMax, yMin, yMax } = getTileRange();
-    const tileMap = new Map();
-    const fetches = [];
-    for (let x=xMin; x<=xMax; x++) {
-      for (let y=yMin; y<=yMax; y++) {
-        fetches.push(
-          fetch(fn(z,x,y))
-            .then(r=>r.blob()).then(b=>createImageBitmap(b))
-            .then(bmp=>tileMap.set(`${x},${y}`,bmp))
-            .catch(()=>{})
-        );
-      }
-    }
-    await Promise.all(fetches);
+    const fn=TILE_URLS[currentLayer]; if (!fn) return null;
+    const {z,xMin,xMax,yMin,yMax}=getTileRange();
+    const tileMap=new Map();
+    await Promise.all(Array.from({length:(xMax-xMin+1)*(yMax-yMin+1)},(_,i)=>{
+      const x=xMin+Math.floor(i/(yMax-yMin+1)), y=yMin+(i%(yMax-yMin+1));
+      return fetch(fn(z,x,y)).then(r=>r.blob()).then(b=>createImageBitmap(b)).then(bmp=>tileMap.set(`${x},${y}`,bmp)).catch(()=>{});
+    }));
     return tileMap;
   }
-
-  function drawTiles(ctx, tileMap) {
-    if (!tileMap) {
-      ctx.fillStyle = '#1a2233';
-      ctx.fillRect(0,0,W,H);
-      return;
-    }
-    const { z, tileSize, xMin, xMax, yMin, yMax } = getTileRange();
-    const nw = map.project(map.getBounds().getNorthWest(), z);
-    const offX = -(nw.x % tileSize);
-    const offY = -(nw.y % tileSize);
-    for (let x=xMin; x<=xMax; x++) {
-      for (let y=yMin; y<=yMax; y++) {
-        const bmp = tileMap.get(`${x},${y}`);
-        if (!bmp) continue;
-        ctx.drawImage(bmp, offX+(x-xMin)*tileSize, offY+(y-yMin)*tileSize, tileSize, tileSize);
-      }
-    }
+  function drawTiles(ctx,tileMap) {
+    if (!tileMap){ctx.fillStyle='#1a2233';ctx.fillRect(0,0,W,H);return;}
+    const {z,tileSize,xMin,xMax,yMin,yMax}=getTileRange();
+    const nw=map.project(map.getBounds().getNorthWest(),z);
+    const offX=-(nw.x%tileSize), offY=-(nw.y%tileSize);
+    for(let x=xMin;x<=xMax;x++) for(let y=yMin;y<=yMax;y++){const bmp=tileMap.get(`${x},${y}`);if(bmp)ctx.drawImage(bmp,offX+(x-xMin)*tileSize,offY+(y-yMin)*tileSize,tileSize,tileSize);}
   }
-
-  setStatus('⏺ Chargement fond de carte…', 'replay');
-  const tileMap = await preloadTiles();
-  setStatus('⏺ Export en cours…', 'replay');
-
-  function latLngToPixel(lat, lng) {
-    const pt = map.latLngToContainerPoint(L.latLng(lat, lng));
-    return { x: pt.x, y: pt.y };
+  setStatus('⏺ Chargement fond de carte…','replay');
+  const tileMap=await preloadTiles();
+  setStatus('⏺ Export en cours…','replay');
+  function latLngToPixel(lat,lng){const pt=map.latLngToContainerPoint(L.latLng(lat,lng));return{x:pt.x,y:pt.y};}
+  function drawBubble(ctx,x,y,pseudo,team,color){
+    const label=team?`${pseudo} · ${team}`:pseudo;
+    ctx.font=`600 11px system-ui,sans-serif`;
+    const tw=ctx.measureText(label).width, bw=tw+16, bh=20, bx=x-bw/2, by=y-bh-14;
+    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,6);ctx.fillStyle='rgba(15,23,42,0.82)';ctx.fill();
+    ctx.strokeStyle=color;ctx.lineWidth=1.2;ctx.stroke();
+    ctx.fillStyle='#e2e8f0';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,x,by+bh/2);
+    ctx.beginPath();ctx.arc(x,y-2,6,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();ctx.strokeStyle='white';ctx.lineWidth=1.5;ctx.stroke();
   }
-
-  function drawBubble(ctx, x, y, pseudo, team, color) {
-    const label = team ? `${pseudo} · ${team}` : pseudo;
-    const fontSize = 11;
-    ctx.font = `600 ${fontSize}px system-ui, sans-serif`;
-    const tw = ctx.measureText(label).width;
-    const bw = tw + 16, bh = 20;
-    const bx = x - bw/2, by = y - bh - 14;
-    ctx.beginPath();
-    ctx.roundRect(bx, by, bw, bh, 6);
-    ctx.fillStyle = 'rgba(15,23,42,0.82)';
-    ctx.fill();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
-    ctx.fillStyle = '#e2e8f0';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(label, x, by + bh/2);
-    ctx.beginPath();
-    ctx.arc(x, y - 2, 6, 0, Math.PI*2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+  function drawTrail(ctx,points,color){
+    if(points.length<2)return;
+    ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);
+    for(let i=1;i<points.length;i++)ctx.lineTo(points[i].x,points[i].y);
+    ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.globalAlpha=0.7;ctx.stroke();ctx.globalAlpha=1;
   }
-
-  function drawTrail(ctx, points, color) {
-    if (points.length < 2) return;
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i=1;i<points.length;i++) ctx.lineTo(points[i].x, points[i].y);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2.5;
-    ctx.globalAlpha = 0.7;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+  function drawWatermark(ctx,W,H){
+    const text='🗺️ Créé avec Convergence Map';
+    ctx.font='600 11px system-ui,sans-serif';
+    const tw=ctx.measureText(text).width, bw=tw+24, bh=26, bx=(W-bw)/2, by=H-50;
+    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,13);ctx.fillStyle='rgba(15,23,42,0.72)';ctx.fill();
+    ctx.strokeStyle='rgba(56,189,248,0.3)';ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle='rgba(226,232,240,0.8)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,W/2,by+bh/2);
   }
-
-  function drawWatermark(ctx, W, H) {
-    const text = '🗺️ Créé avec Convergence Map';
-    ctx.font = '600 11px system-ui, sans-serif';
-    const tw = ctx.measureText(text).width;
-    const bw = tw + 24, bh = 26;
-    const bx = (W - bw) / 2, by = H - 50;
-    ctx.beginPath();
-    ctx.roundRect(bx, by, bw, bh, 13);
-    ctx.fillStyle = 'rgba(15,23,42,0.72)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(56,189,248,0.3)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(226,232,240,0.8)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, W/2, by + bh/2);
-  }
-
-  const showWatermarkInVideo = currentLicence.limits.branding;
-  const exportSpeed = replaySpeed;
-  const totalFrames = replayTimestamps.length;
-  const framesPerTick = Math.max(1, Math.round(exportSpeed));
-
-  const exportLoop = () => {
-    return new Promise(resolve => {
-      let idx = 0;
-      const step = () => {
-        if (idx >= totalFrames) { resolve(); return; }
-        const ts = replayTimestamps[idx];
-        ctx.clearRect(0, 0, W, H);
-        drawTiles(ctx, tileMap);
-        Object.entries(replayData).forEach(([pid, entries]) => {
-          const color = getColor(pid);
-          const times = Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>a-b);
-          if (!times.length) return;
-          const trailPts = times.map(t => {
-            const p = entries[t];
-            return latLngToPixel(p.lat, p.lng);
-          });
-          drawTrail(ctx, trailPts, color);
-          const curT = times[times.length-1];
-          const pos = entries[curT];
-          const px = latLngToPixel(pos.lat, pos.lng);
-          drawBubble(ctx, px.x, px.y, pos.pseudo||pid, pos.team||'', color);
-        });
-        if (showWatermarkInVideo) drawWatermark(ctx, W, H);
-        const realDate = new Date(ts);
-        const dateStr = realDate.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
-        const timeStr = realDate.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-        const fullStr = `${dateStr}  ${timeStr}`;
-        ctx.font = '600 12px system-ui, sans-serif';
-        const tw2 = ctx.measureText(fullStr).width;
-        const bw2 = tw2 + 18, bh2 = 24;
-        const bx2 = W - bw2 - 12, by2 = 12;
-        ctx.beginPath();
-        ctx.roundRect(bx2, by2, bw2, bh2, 6);
-        ctx.fillStyle = 'rgba(15,23,42,0.75)';
-        ctx.fill();
-        ctx.fillStyle = 'rgba(148,163,184,0.95)';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(fullStr, bx2 + bw2/2, by2 + bh2/2);
-        idx += framesPerTick;
-        setTimeout(step, 33);
-      };
-      step();
-    });
-  };
-
-  await exportLoop();
-
-  const endFrames = 60;
-  await new Promise(resolve => {
-    let ef = 0;
-    const endStep = () => {
-      if (ef >= endFrames) { resolve(); return; }
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = 'rgba(10,17,32,0.92)';
-      ctx.fillRect(0, 0, W, H);
-      ctx.font = '800 28px system-ui, sans-serif';
-      ctx.fillStyle = '#e2e8f0';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('🏁 ' + (currentEventName || currentEventCode), W/2, H/2 - 30);
-      ctx.font = '500 14px system-ui, sans-serif';
-      ctx.fillStyle = '#64748b';
-      ctx.fillText(`${Object.keys(replayData).length} participants`, W/2, H/2 + 10);
-      ctx.font = '700 13px system-ui, sans-serif';
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillText('Créé avec Convergence Map', W/2, H/2 + 50);
-      ef++;
-      setTimeout(endStep, 33);
+  const showWatermarkInVideo=currentLicence.limits.branding;
+  const exportSpeed=replaySpeed, totalFrames=replayTimestamps.length, framesPerTick=Math.max(1,Math.round(exportSpeed));
+  await new Promise(resolve=>{
+    let idx=0;
+    const step=()=>{
+      if(idx>=totalFrames){resolve();return;}
+      const ts=replayTimestamps[idx];
+      ctx.clearRect(0,0,W,H);drawTiles(ctx,tileMap);
+      Object.entries(replayData).forEach(([pid,entries])=>{
+        const color=getColor(pid);
+        const times=Object.keys(entries).map(Number).filter(t=>t<=ts).sort((a,b)=>a-b);
+        if(!times.length)return;
+        drawTrail(ctx,times.map(t=>{const p=entries[t];return latLngToPixel(p.lat,p.lng);}),color);
+        const curT=times[times.length-1], pos=entries[curT], px=latLngToPixel(pos.lat,pos.lng);
+        drawBubble(ctx,px.x,px.y,pos.pseudo||pid,pos.team||'',color);
+      });
+      if(showWatermarkInVideo)drawWatermark(ctx,W,H);
+      const realDate=new Date(ts);
+      const fullStr=`${realDate.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'})}  ${realDate.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`;
+      ctx.font='600 12px system-ui,sans-serif';
+      const tw2=ctx.measureText(fullStr).width, bw2=tw2+18, bh2=24, bx2=W-bw2-12, by2=12;
+      ctx.beginPath();ctx.roundRect(bx2,by2,bw2,bh2,6);ctx.fillStyle='rgba(15,23,42,0.75)';ctx.fill();
+      ctx.fillStyle='rgba(148,163,184,0.95)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(fullStr,bx2+bw2/2,by2+bh2/2);
+      idx+=framesPerTick;setTimeout(step,33);
+    };
+    step();
+  });
+  await new Promise(resolve=>{
+    let ef=0;
+    const endStep=()=>{
+      if(ef>=60){resolve();return;}
+      ctx.clearRect(0,0,W,H);ctx.fillStyle='rgba(10,17,32,0.92)';ctx.fillRect(0,0,W,H);
+      ctx.font='800 28px system-ui,sans-serif';ctx.fillStyle='#e2e8f0';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('🏁 '+(currentEventName||currentEventCode),W/2,H/2-30);
+      ctx.font='500 14px system-ui,sans-serif';ctx.fillStyle='#64748b';ctx.fillText(`${Object.keys(replayData).length} participants`,W/2,H/2+10);
+      ctx.font='700 13px system-ui,sans-serif';ctx.fillStyle='#38bdf8';ctx.fillText('Créé avec Convergence Map',W/2,H/2+50);
+      ef++;setTimeout(endStep,33);
     };
     endStep();
   });
-
   recorder.stop();
 }
 
-// ── Auto-join / Auto-watch depuis paramètres URL ──
+// ── Auto-join / Auto-watch depuis URL ──
 (async () => {
   const params = new URLSearchParams(location.search);
   const urlCode = params.get('code');
   const urlMode = params.get('mode');
-
   if (!urlCode) return;
-
   if (urlMode === 'watch') {
     const snap = await get(ref(db, `events/${urlCode}`));
     if (!snap.exists()) return;
-    currentEventCode = urlCode;
-    currentLicence = await getLicence(db, { code: urlCode, uid: currentUser?.uid });
-    const existingBadge = document.getElementById('plan-badge');
-    if (existingBadge) existingBadge.remove();
-    const badge = document.createElement('span');
-    badge.id = 'plan-badge';
-    badge.innerHTML = renderPlanBadge(currentLicence.plan);
-    document.getElementById('topbar').appendChild(badge);
-    setStatus(`👁 Observation — ${urlCode}`, 'live');
-    document.getElementById('participants-list').style.display = 'block';
-    document.getElementById('btn-replay').style.display = 'inline-block';
-    startWatching(urlCode);
-
+    // Attendre que l'auth soit résolue avant de vérifier
+    await new Promise(resolve => {
+      const unsub = onAuthStateChanged(auth, user => { currentUser = user; unsub(); resolve(); });
+    });
+    await launchWatch(urlCode);
   } else {
     document.getElementById('join-code').value = urlCode;
     showPanel('join');
